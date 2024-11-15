@@ -1,27 +1,78 @@
 <?php
-// API URL to fetch users
 $apiUrl = 'https://auth-web-api.onrender.com/api/users';
-
-// Fetch user data from the API
 $jsonData = @file_get_contents($apiUrl);
 
-// Initialize totalUsers count to 0 in case of failure
 $totalUsers = 0;
+$activeUsers = 0;
+$inactiveUsers = 0;
 $totalSessionTime = 0;
+$bouncedUsers = 0; // Users with session time below 20 seconds
+$dailyActiveUsers = 0;
+$weeklyActiveUsers = 0;
+$apiCalls = 100;
+$apiErrors = 5; 
+$serverDowntime = 0;
 
 if ($jsonData !== false) {
     $data = json_decode($jsonData, true);
     $totalUsers = count($data);
+    $currentTime = time();
+    
     foreach ($data as $user) {
         $sessionTime = isset($user['sessiontime']) ? (int)$user['sessiontime'] : 0;
+        $lastActive = isset($user['lastactive']) ? strtotime($user['lastactive']) : 0;
+
+        // Total session time
         $totalSessionTime += $sessionTime;
+
+        // Count active users (last active within 7 days)
+        if ($lastActive > strtotime('-7 days', $currentTime)) {
+            $activeUsers++;
+        } else {
+            $inactiveUsers++;
+        }
+
+        // Count bounced users (session time below 20 seconds)
+        if ($sessionTime < 20) {
+            $bouncedUsers++;
+        }
+
+        // Count daily active users (last active within 24 hours)
+        if ($lastActive > strtotime('-1 day', $currentTime)) {
+            $dailyActiveUsers++;
+        }
+
+        // Count weekly active users (last active within 7 days)
+        if ($lastActive > strtotime('-7 days', $currentTime)) {
+            $weeklyActiveUsers++;
+        }
     }
 
-// Calculate bounce rate
-$bounceRate = ($totalSessionTime/$totalSessionTime/20) *100;
+    // Calculate bounce rate
+    $bounceRate = ($totalUsers > 0) ? ($bouncedUsers / $totalUsers) * 100 : 0;
+
+    // Calculate average session time
+    $averageSessionTime = ($totalUsers > 0) ? $totalSessionTime / $totalUsers : 0;
+
+    // Calculate API call success rate
+    $apiSuccessRate = ($apiCalls > 0) ? (($apiCalls - $apiErrors) / $apiCalls) * 100 : 0;
+
+    // Example: Server downtime (replace with actual server log data)
+    $serverDowntime = 0; // Dummy value for now
 }
-//echo "<script>alert('$totalSessionTime');</script>";
+
+// Output the analytics
+//echo "Total Users: $totalUsers<br>";
+//echo "Active Users: $activeUsers<br>";
+//echo "Inactive Users: $inactiveUsers<br>";
+//echo "Bounce Rate: $bounceRate%<br>";
+//echo "Average Session Time: $averageSessionTime seconds<br>";
+//echo "Daily Active Users: $dailyActiveUsers<br>";
+//echo "Weekly Active Users: $weeklyActiveUsers<br>";
+//echo "API Success Rate: $apiSuccessRate%<br>";
+//echo "Server Downtime: $serverDowntime hours<br>";
 ?>
+
 <!doctype html>
 <html lang="en" data-layout="vertical" data-topbar="light" data-sidebar="dark" data-sidebar-size="lg"
     data-sidebar-image="none">
