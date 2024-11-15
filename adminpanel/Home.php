@@ -1,77 +1,94 @@
 <?php
+// API URL to fetch users
 $apiUrl = 'https://auth-web-api.onrender.com/api/users';
+
+// Fetch user data from the API
 $jsonData = @file_get_contents($apiUrl);
 
+// Initialize analytics variables
 $totalUsers = 0;
-$activeUsers = 0;
-$inactiveUsers = 0;
 $totalSessionTime = 0;
-$bouncedUsers = 0; // Users with session time below 20 seconds
-$dailyActiveUsers = 0;
-$weeklyActiveUsers = 0;
-$apiCalls = 100;
-$apiErrors = 5; 
-$serverDowntime = 0;
+$pageVisitCounts = [];
+$activeUsers = [];
+$inactiveUsers = [];
+$newUsers = [];
+$oldUsers = [];
+$peakUsageTime = [];
+
+// Set thresholds
+$activeThreshold = strtotime('-7 days'); // For active/inactive users
+$newUserThreshold = strtotime('-30 days'); // For new/old users
 
 if ($jsonData !== false) {
     $data = json_decode($jsonData, true);
     $totalUsers = count($data);
-    $currentTime = time();
-    
-    foreach ($data as $user) {
-        $sessionTime = isset($user['sessiontime']) ? (int)$user['sessiontime'] : 0;
-        $lastActive = isset($user['lastactive']) ? strtotime($user['lastactive']) : 0;
 
-        // Total session time
+    $hourlyUsage = array_fill(0, 24, 0); // Array to track user activity by hour
+
+    foreach ($data as $user) {
+        // Session Time
+        $sessionTime = isset($user['sessiontime']) ? (int)$user['sessiontime'] : 0;
         $totalSessionTime += $sessionTime;
 
-        // Count active users (last active within 7 days)
-        if ($lastActive > strtotime('-7 days', $currentTime)) {
-            $activeUsers++;
+        // Page Visits
+        if (isset($user['pageVisits']) && is_array($user['pageVisits'])) {
+            foreach ($user['pageVisits'] as $visit) {
+                $pageName = $visit['pageName'];
+                $visitTime = strtotime($visit['visitTime']);
+                
+                // Track page visit counts
+                if (!isset($pageVisitCounts[$pageName])) {
+                    $pageVisitCounts[$pageName] = 0;
+                }
+                $pageVisitCounts[$pageName]++;
+
+                // Track hourly usage
+                $hour = (int)date('G', $visitTime); // Extract hour (0-23)
+                $hourlyUsage[$hour]++;
+            }
+        }
+
+        // User Activity (Active/Inactive)
+        $lastActive = isset($user['lastActive']) ? strtotime($user['lastActive']) : 0;
+        if ($lastActive >= $activeThreshold) {
+            $activeUsers[] = $user['userId'];
         } else {
-            $inactiveUsers++;
+            $inactiveUsers[] = $user['userId'];
         }
 
-        // Count bounced users (session time below 20 seconds)
-        if ($sessionTime < 20) {
-            $bouncedUsers++;
-        }
-
-        // Count daily active users (last active within 24 hours)
-        if ($lastActive > strtotime('-1 day', $currentTime)) {
-            $dailyActiveUsers++;
-        }
-
-        // Count weekly active users (last active within 7 days)
-        if ($lastActive > strtotime('-7 days', $currentTime)) {
-            $weeklyActiveUsers++;
+        // New/Old Users
+        $registrationDate = isset($user['registrationDate']) ? strtotime($user['registrationDate']) : 0;
+        if ($registrationDate >= $newUserThreshold) {
+            $newUsers[] = $user['userId'];
+        } else {
+            $oldUsers[] = $user['userId'];
         }
     }
 
-    // Calculate bounce rate
-    $bounceRate = ($totalUsers > 0) ? ($bouncedUsers / $totalUsers) * 100 : 0;
-
-    // Calculate average session time
-    $averageSessionTime = ($totalUsers > 0) ? $totalSessionTime / $totalUsers : 0;
-
-    // Calculate API call success rate
-    $apiSuccessRate = ($apiCalls > 0) ? (($apiCalls - $apiErrors) / $apiCalls) * 100 : 0;
-
-    // Example: Server downtime (replace with actual server log data)
-    $serverDowntime = 0; // Dummy value for now
+    // Calculate Peak Usage Time
+    $maxUsage = max($hourlyUsage);
+    foreach ($hourlyUsage as $hour => $usage) {
+        if ($usage === $maxUsage) {
+            $peakUsageTime[] = $hour; // Record hours with max usage
+        }
+    }
 }
 
-// Output the analytics
-//echo "Total Users: $totalUsers<br>";
-//echo "Active Users: $activeUsers<br>";
-//echo "Inactive Users: $inactiveUsers<br>";
-//echo "Bounce Rate: $bounceRate%<br>";
-//echo "Average Session Time: $averageSessionTime seconds<br>";
-//echo "Daily Active Users: $dailyActiveUsers<br>";
-//echo "Weekly Active Users: $weeklyActiveUsers<br>";
-//echo "API Success Rate: $apiSuccessRate%<br>";
-//echo "Server Downtime: $serverDowntime hours<br>";
+// Display results
+echo "Total Users: $totalUsers<br>";
+echo "Total Session Time: $totalSessionTime seconds<br>";
+echo "Top Pages Visited:<br>";
+arsort($pageVisitCounts);
+foreach ($pageVisitCounts as $page => $count) {
+    echo "$page: $count visits<br>";
+}
+echo "Active Users: " . count($activeUsers) . "<br>";
+echo "Inactive Users: " . count($inactiveUsers) . "<br>";
+echo "New Users: " . count($newUsers) . "<br>";
+echo "Old Users: " . count($oldUsers) . "<br>";
+echo "Peak Usage Time: " . implode(', ', $peakUsageTime) . " hours<br>";
 ?>
+
 
 <!doctype html>
 <html lang="en" data-layout="vertical" data-topbar="light" data-sidebar="dark" data-sidebar-size="lg"
@@ -406,42 +423,146 @@ if ($jsonData !== false) {
                     </div>
                     <!-- end page title -->
 
-                    <div class="row">
-                        <div class="col-xxl-12">
-                            <div class="d-flex flex-column h-100">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="card card-animate">
-                                            <div class="card-body">
-                                                <div class="d-flex justify-content-between">
-                                                    <div>
-                                                        <!-- Displaying the total number of users -->
-                                                        <div>
-                                                            <p class="fw-medium text-muted mb-0">Users</p>
-                                                            <h2 class="mt-4 ff-secondary fw-semibold">
+                   <div class="col-md-6">
+    <div class="card card-animate">
+        <div class="card-body">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <p class="fw-medium text-muted mb-0">Active Users</p>
+                    <h2 class="mt-4 ff-secondary fw-semibold">
+                        <span class="counter-value" data-target="<?= count($activeUsers) ?>">
+                            <?= count($activeUsers) ?>
+                        </span>
+                    </h2>
+                </div>
+                <div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-soft-success rounded-circle fs-2">
+                            <i data-feather="activity" class="text-success"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-                                                                <!-- Dynamically insert total users in data-target and as the content of the span -->
-                                                                <span class="counter-value"
-                                                                    data-target="<?= $totalUsers ?>"><?= $totalUsers ?></span>
-                                                            </h2>
-                                                            <p class="mb-0 text-muted">
-                                                            <span class="badge bg-light text-danger mb-0">
-                                                                <i class="ri-arrow-down-line align-middle"></i> 3.96 %
-                                                            </span> vs. previous month
-                                                        </p>
-                                                        </div>
-                                                    </div>
-                                                    <div>
-                                                        <div class="avatar-sm flex-shrink-0">
-                                                            <span class="avatar-title bg-soft-info rounded-circle fs-2">
-                                                                <i data-feather="users" class="text-info"></i>
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div><!-- end card body -->
-                                        </div> <!-- end card-->
-                                    </div> <!-- end col-->
+<div class="col-md-6">
+    <div class="card card-animate">
+        <div class="card-body">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <p class="fw-medium text-muted mb-0">Inactive Users</p>
+                    <h2 class="mt-4 ff-secondary fw-semibold">
+                        <span class="counter-value" data-target="<?= count($inactiveUsers) ?>">
+                            <?= count($inactiveUsers) ?>
+                        </span>
+                    </h2>
+                </div>
+                <div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-soft-danger rounded-circle fs-2">
+                            <i data-feather="user-x" class="text-danger"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-md-6">
+    <div class="card card-animate">
+        <div class="card-body">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <p class="fw-medium text-muted mb-0">New Users</p>
+                    <h2 class="mt-4 ff-secondary fw-semibold">
+                        <span class="counter-value" data-target="<?= count($newUsers) ?>">
+                            <?= count($newUsers) ?>
+                        </span>
+                    </h2>
+                </div>
+                <div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-soft-primary rounded-circle fs-2">
+                            <i data-feather="user-plus" class="text-primary"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-md-6">
+    <div class="card card-animate">
+        <div class="card-body">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <p class="fw-medium text-muted mb-0">New Users</p>
+                    <h2 class="mt-4 ff-secondary fw-semibold">
+                        <span class="counter-value" data-target="<?= count($newUsers) ?>">
+                            <?= count($newUsers) ?>
+                        </span>
+                    </h2>
+                </div>
+                <div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-soft-primary rounded-circle fs-2">
+                            <i data-feather="user-plus" class="text-primary"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-md-6">
+    <div class="card card-animate">
+        <div class="card-body">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <p class="fw-medium text-muted mb-0">Peak Usage Time</p>
+                    <h2 class="mt-4 ff-secondary fw-semibold">
+                        <span><?= implode(', ', $peakUsageTime) ?> hours</span>
+                    </h2>
+                </div>
+                <div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-soft-warning rounded-circle fs-2">
+                            <i data-feather="clock" class="text-warning"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-md-6">
+    <div class="card card-animate">
+        <div class="card-body">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <p class="fw-medium text-muted mb-0">Top Pages Visited</p>
+                    <h2 class="mt-4 ff-secondary fw-semibold">
+                        <ul>
+                            <?php foreach (array_slice($pageVisitCounts, 0, 3) as $page => $count): ?>
+                                <li><?= $page ?>: <?= $count ?> visits</li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </h2>
+                </div>
+                <div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-soft-info rounded-circle fs-2">
+                            <i data-feather="file" class="text-info"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 
                                     <div class="col-md-6">
                                         <div class="card card-animate">
