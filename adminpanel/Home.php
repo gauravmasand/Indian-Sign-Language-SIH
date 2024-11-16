@@ -5,98 +5,30 @@ $apiUrl = 'https://auth-web-api.onrender.com/api/users';
 // Fetch user data from the API
 $jsonData = @file_get_contents($apiUrl);
 
-// Initialize analytics variables
+// Initialize totalUsers count to 0 in case of failure
 $totalUsers = 0;
 $totalSessionTime = 0;
-$pageVisitCounts = [];
-$activeUsers = [];
-$inactiveUsers = [];
-$newUsers = [];
-$oldUsers = [];
-$peakUsageTime = [];
-
-// Set thresholds
-$activeThreshold = strtotime('-7 days'); // For active/inactive users
-$newUserThreshold = strtotime('-30 days'); // For new/old users
 
 if ($jsonData !== false) {
     $data = json_decode($jsonData, true);
     $totalUsers = count($data);
-
-    $hourlyUsage = array_fill(0, 24, 0); // Array to track user activity by hour
-
     foreach ($data as $user) {
-        // Session Time
         $sessionTime = isset($user['sessiontime']) ? (int)$user['sessiontime'] : 0;
         $totalSessionTime += $sessionTime;
-
-        // Page Visits
-        if (isset($user['pageVisits']) && is_array($user['pageVisits'])) {
-            foreach ($user['pageVisits'] as $visit) {
-                $pageName = $visit['pageName'];
-                $visitTime = strtotime($visit['visitTime']);
-                
-                // Track page visit counts
-                if (!isset($pageVisitCounts[$pageName])) {
-                    $pageVisitCounts[$pageName] = 0;
-                }
-                $pageVisitCounts[$pageName]++;
-
-                // Track hourly usage
-                $hour = (int)date('G', $visitTime); // Extract hour (0-23)
-                $hourlyUsage[$hour]++;
-            }
-        }
-
-        // User Activity (Active/Inactive)
-        $lastActive = isset($user['lastActive']) ? strtotime($user['lastActive']) : 0;
-        if ($lastActive >= $activeThreshold) {
-            $activeUsers[] = $user['userId'];
-        } else {
-            $inactiveUsers[] = $user['userId'];
-        }
-
-        // New/Old Users
-        $registrationDate = isset($user['registrationDate']) ? strtotime($user['registrationDate']) : 0;
-        if ($registrationDate >= $newUserThreshold) {
-            $newUsers[] = $user['userId'];
-        } else {
-            $oldUsers[] = $user['userId'];
-        }
     }
 
-    // Calculate Peak Usage Time
-    $maxUsage = max($hourlyUsage);
-    foreach ($hourlyUsage as $hour => $usage) {
-        if ($usage === $maxUsage) {
-            $peakUsageTime[] = $hour; // Record hours with max usage
-        }
-    }
+// Calculate bounce rate
+$bounceRate = ($totalSessionTime/$totalSessionTime/20) *100;
 }
-
-// Display results
-echo "Total Users: $totalUsers<br>";
-echo "Total Session Time: $totalSessionTime seconds<br>";
-echo "Top Pages Visited:<br>";
-arsort($pageVisitCounts);
-foreach ($pageVisitCounts as $page => $count) {
-    echo "$page: $count visits<br>";
-}
-echo "Active Users: " . count($activeUsers) . "<br>";
-echo "Inactive Users: " . count($inactiveUsers) . "<br>";
-echo "New Users: " . count($newUsers) . "<br>";
-echo "Old Users: " . count($oldUsers) . "<br>";
-echo "Peak Usage Time: " . implode(', ', $peakUsageTime) . " hours<br>";
+//echo "<script>alert('$totalSessionTime');</script>";
 ?>
-
-
 <!doctype html>
 <html lang="en" data-layout="vertical" data-topbar="light" data-sidebar="dark" data-sidebar-size="lg"
     data-sidebar-image="none">
 <!-- Mirrored from themesbrand.com/velzon/html/default/dashboard-analytics.html by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 01 Jul 2022 06:35:06 GMT -->
 
 <head>
-
+    <h1>Hello</h1>
     <meta charset="utf-8" />
     <title>Analytics | Velzon - Admin & Dashboard Template</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -423,146 +355,42 @@ echo "Peak Usage Time: " . implode(', ', $peakUsageTime) . " hours<br>";
                     </div>
                     <!-- end page title -->
 
-                   <div class="col-md-6">
-    <div class="card card-animate">
-        <div class="card-body">
-            <div class="d-flex justify-content-between">
-                <div>
-                    <p class="fw-medium text-muted mb-0">Active Users</p>
-                    <h2 class="mt-4 ff-secondary fw-semibold">
-                        <span class="counter-value" data-target="<?= count($activeUsers) ?>">
-                            <?= count($activeUsers) ?>
-                        </span>
-                    </h2>
-                </div>
-                <div>
-                    <div class="avatar-sm flex-shrink-0">
-                        <span class="avatar-title bg-soft-success rounded-circle fs-2">
-                            <i data-feather="activity" class="text-success"></i>
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+                    <div class="row">
+                        <div class="col-xxl-12">
+                            <div class="d-flex flex-column h-100">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="card card-animate">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between">
+                                                    <div>
+                                                        <!-- Displaying the total number of users -->
+                                                        <div>
+                                                            <p class="fw-medium text-muted mb-0">Users</p>
+                                                            <h2 class="mt-4 ff-secondary fw-semibold">
 
-<div class="col-md-6">
-    <div class="card card-animate">
-        <div class="card-body">
-            <div class="d-flex justify-content-between">
-                <div>
-                    <p class="fw-medium text-muted mb-0">Inactive Users</p>
-                    <h2 class="mt-4 ff-secondary fw-semibold">
-                        <span class="counter-value" data-target="<?= count($inactiveUsers) ?>">
-                            <?= count($inactiveUsers) ?>
-                        </span>
-                    </h2>
-                </div>
-                <div>
-                    <div class="avatar-sm flex-shrink-0">
-                        <span class="avatar-title bg-soft-danger rounded-circle fs-2">
-                            <i data-feather="user-x" class="text-danger"></i>
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="col-md-6">
-    <div class="card card-animate">
-        <div class="card-body">
-            <div class="d-flex justify-content-between">
-                <div>
-                    <p class="fw-medium text-muted mb-0">New Users</p>
-                    <h2 class="mt-4 ff-secondary fw-semibold">
-                        <span class="counter-value" data-target="<?= count($newUsers) ?>">
-                            <?= count($newUsers) ?>
-                        </span>
-                    </h2>
-                </div>
-                <div>
-                    <div class="avatar-sm flex-shrink-0">
-                        <span class="avatar-title bg-soft-primary rounded-circle fs-2">
-                            <i data-feather="user-plus" class="text-primary"></i>
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="col-md-6">
-    <div class="card card-animate">
-        <div class="card-body">
-            <div class="d-flex justify-content-between">
-                <div>
-                    <p class="fw-medium text-muted mb-0">New Users</p>
-                    <h2 class="mt-4 ff-secondary fw-semibold">
-                        <span class="counter-value" data-target="<?= count($newUsers) ?>">
-                            <?= count($newUsers) ?>
-                        </span>
-                    </h2>
-                </div>
-                <div>
-                    <div class="avatar-sm flex-shrink-0">
-                        <span class="avatar-title bg-soft-primary rounded-circle fs-2">
-                            <i data-feather="user-plus" class="text-primary"></i>
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="col-md-6">
-    <div class="card card-animate">
-        <div class="card-body">
-            <div class="d-flex justify-content-between">
-                <div>
-                    <p class="fw-medium text-muted mb-0">Peak Usage Time</p>
-                    <h2 class="mt-4 ff-secondary fw-semibold">
-                        <span><?= implode(', ', $peakUsageTime) ?> hours</span>
-                    </h2>
-                </div>
-                <div>
-                    <div class="avatar-sm flex-shrink-0">
-                        <span class="avatar-title bg-soft-warning rounded-circle fs-2">
-                            <i data-feather="clock" class="text-warning"></i>
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="col-md-6">
-    <div class="card card-animate">
-        <div class="card-body">
-            <div class="d-flex justify-content-between">
-                <div>
-                    <p class="fw-medium text-muted mb-0">Top Pages Visited</p>
-                    <h2 class="mt-4 ff-secondary fw-semibold">
-                        <ul>
-                            <?php foreach (array_slice($pageVisitCounts, 0, 3) as $page => $count): ?>
-                                <li><?= $page ?>: <?= $count ?> visits</li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </h2>
-                </div>
-                <div>
-                    <div class="avatar-sm flex-shrink-0">
-                        <span class="avatar-title bg-soft-info rounded-circle fs-2">
-                            <i data-feather="file" class="text-info"></i>
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
+                                                                <!-- Dynamically insert total users in data-target and as the content of the span -->
+                                                                <span class="counter-value"
+                                                                    data-target="<?= $totalUsers ?>"><?= $totalUsers ?></span>
+                                                            </h2>
+                                                            <p class="mb-0 text-muted">
+                                                            <span class="badge bg-light text-danger mb-0">
+                                                                <i class="ri-arrow-down-line align-middle"></i> 3.96 %
+                                                            </span> vs. previous month
+                                                        </p>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <div class="avatar-sm flex-shrink-0">
+                                                            <span class="avatar-title bg-soft-info rounded-circle fs-2">
+                                                                <i data-feather="users" class="text-info"></i>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div><!-- end card body -->
+                                        </div> <!-- end card-->
+                                    </div> <!-- end col-->
 
                                     <div class="col-md-6">
                                         <div class="card card-animate">
@@ -589,38 +417,241 @@ echo "Peak Usage Time: " . implode(', ', $peakUsageTime) . " hours<br>";
                                                 </div>
                                             </div><!-- end card body -->
                                         </div> <!-- end card-->
-                                    </div> <!-- end col-->
-                                </div> <!-- end row-->
+                                    </div> <!-- end col-->   
 
-                                <div class="row">
+    <div class="col-md-6">
+        <div class="card card-animate">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <p class="fw-medium text-muted mb-0">API Success Rate</p>
+                        <h2 class="mt-4 ff-secondary fw-semibold">
+                            <span class="counter-value" data-target="<?= $apiSuccessRate ?>"><?= $apiSuccessRate ?>%</span>
+                        </h2>
+                    </div>
+                    <div>
+                        <div class="avatar-sm flex-shrink-0">
+                            <span class="avatar-title bg-soft-info rounded-circle fs-2">
+                                <i data-feather="server" class="text-info"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Failed API Calls -->
+    <div class="col-md-6">
+        <div class="card card-animate">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <p class="fw-medium text-muted mb-0">Failed API Calls</p>
+                        <h2 class="mt-4 ff-secondary fw-semibold">
+                            <span class="counter-value" data-target="<?= $failedApiCalls ?>"><?= $failedApiCalls ?></span>
+                        </h2>
+                    </div>
+                    <div>
+                        <div class="avatar-sm flex-shrink-0">
+                            <span class="avatar-title bg-soft-danger rounded-circle fs-2">
+                                <i data-feather="alert-circle" class="text-danger"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Server Uptime -->
+    <div class="col-md-6">
+        <div class="card card-animate">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <p class="fw-medium text-muted mb-0">Server Uptime</p>
+                        <h2 class="mt-4 ff-secondary fw-semibold">
+                            <span class="counter-value" data-target="<?= $serverUptime ?>"><?= $serverUptime ?> hrs</span>
+                        </h2>
+                    </div>
+                    <div>
+                        <div class="avatar-sm flex-shrink-0">
+                            <span class="avatar-title bg-soft-success rounded-circle fs-2">
+                                <i data-feather="monitor" class="text-success"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Server Downtime -->
+    <div class="col-md-6">
+        <div class="card card-animate">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <p class="fw-medium text-muted mb-0">Server Downtime</p>
+                        <h2 class="mt-4 ff-secondary fw-semibold">
+                            <span class="counter-value" data-target="<?= $downtime ?>"><?= $downtime ?> hrs</span>
+                        </h2>
+                    </div>
+                    <div>
+                        <div class="avatar-sm flex-shrink-0">
+                            <span class="avatar-title bg-soft-danger rounded-circle fs-2">
+                                <i data-feather="server" class="text-danger"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+                                    <!-- Peak Traffic Time -->
                                     <div class="col-md-6">
                                         <div class="card card-animate">
                                             <div class="card-body">
                                                 <div class="d-flex justify-content-between">
                                                     <div>
-                                                        <p class="fw-medium text-muted mb-0">Avg. Visit Duration</p>
-                                                        <h2 class="mt-4 ff-secondary fw-semibold"><span
-                                                                class="counter-value" data-target="3">0</span>m
-                                                            <span class="counter-value" data-target="40">0</span>sec
+                                                        <p class="fw-medium text-muted mb-0">Peak Traffic Time</p>
+                                                        <h2 class="mt-4 ff-secondary fw-semibold">
+                                                            <span class="counter-value" data-target="<?= $peakTrafficTime ?>"><?= $peakTrafficTime ?></span>
                                                         </h2>
-                                                        <p class="mb-0 text-muted"><span
-                                                                class="badge bg-light text-danger mb-0"> <i
-                                                                    class="ri-arrow-down-line align-middle"></i> 0.24 %
-                                                            </span> vs. previous month</p>
                                                     </div>
                                                     <div>
                                                         <div class="avatar-sm flex-shrink-0">
-                                                            <span class="avatar-title bg-soft-info rounded-circle fs-2">
-                                                                <i data-feather="clock" class="text-info"></i>
+                                                            <span class="avatar-title bg-soft-warning rounded-circle fs-2">
+                                                                <i data-feather="clock" class="text-warning"></i>
                                                             </span>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div><!-- end card body -->
-                                        </div> <!-- end card-->
-                                    </div> <!-- end col-->
-
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Average Daily Time Spent -->
                                     <div class="col-md-6">
+                                        <div class="card card-animate">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between">
+                                                    <div>
+                                                        <p class="fw-medium text-muted mb-0">Avg. Daily Time Spent</p>
+                                                        <h2 class="mt-4 ff-secondary fw-semibold">
+                                                            <span class="counter-value" data-target="<?= $avgDailyTime ?>"><?= $avgDailyTime ?> mins</span>
+                                                        </h2>
+                                                    </div>
+                                                    <div>
+                                                        <div class="avatar-sm flex-shrink-0">
+                                                            <span class="avatar-title bg-soft-warning rounded-circle fs-2">
+                                                                <i data-feather="clock" class="text-warning"></i>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                <!-- User Engagement Rate -->
+                                <div class="col-md-6">
+                                    <div class="card card-animate">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between">
+                                                <div>
+                                                    <p class="fw-medium text-muted mb-0">Engagement Rate</p>
+                                                    <h2 class="mt-4 ff-secondary fw-semibold">
+                                                        <span class="counter-value" data-target="<?= $engagementRate ?>"><?= $engagementRate ?>%</span>
+                                                    </h2>
+                                                </div>
+                                                <div>
+                                                    <div class="avatar-sm flex-shrink-0">
+                                                        <span class="avatar-title bg-soft-success rounded-circle fs-2">
+                                                            <i data-feather="activity" class="text-success"></i>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                        <div class="card card-animate">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between">
+                                                    <div>
+                                                        <p class="fw-medium text-muted mb-0">Avg. Session Duration</p>
+                                                        <h2 class="mt-4 ff-secondary fw-semibold">
+                                                            <span class="counter-value" data-target="<?= $avgSessionDuration ?>"><?= $avgSessionDuration ?> mins</span>
+                                                        </h2>
+                                                    </div>
+                                                    <div>
+                                                        <div class="avatar-sm flex-shrink-0">
+                                                            <span class="avatar-title bg-soft-success rounded-circle fs-2">
+                                                                <i data-feather="clock" class="text-success"></i>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                </div>
+                                    
+                            
+                                    <!-- Daily Active Users (DAU) -->
+                                <div class="col-md-6">
+                                    <div class="card card-animate">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <p class="fw-medium text-muted mb-0">Daily Active Users (DAU)</p>
+                                                <h2 class="mt-4 ff-secondary fw-semibold">
+                                                    <span class="counter-value" data-target="<?= $dau ?>"><?= $dau ?></span>
+                                                </h2>
+                                                <p class="mb-0 text-muted">
+                                                    <span class="badge bg-light text-success mb-0">
+                                                        <i class="ri-arrow-up-line align-middle"></i> 5.43 %
+                                                    </span> vs. previous month
+                                                </p>
+                                            </div>
+                                            <div class="avatar-sm flex-shrink-0">
+                                                <span class="avatar-title bg-soft-warning rounded-circle fs-2">
+                                                    <i data-feather="smartphone" class="text-warning"></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div> <!-- end card body -->
+                                    </div> <!-- end card -->
+                                </div> <!-- end col -->
+
+                            <!-- Monthly Active Users (MAU) -->
+                            <div class="col-md-6">
+                                <div class="card card-animate">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <p class="fw-medium text-muted mb-0">Monthly Active Users (MAU)</p>
+                                                <h2 class="mt-4 ff-secondary fw-semibold">
+                                                    <span class="counter-value" data-target="<?= $mau ?>"><?= $mau ?></span>
+                                                </h2>
+                                                <p class="mb-0 text-muted">
+                                                    <span class="badge bg-light text-danger mb-0">
+                                                        <i class="ri-arrow-down-line align-middle"></i> 2.13 %
+                                                    </span> vs. previous month
+                                                </p>
+                                            </div>
+                                            <div class="avatar-sm flex-shrink-0">
+                                                <span class="avatar-title bg-soft-info rounded-circle fs-2">
+                                                    <i data-feather="smartphone" class="text-info"></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div> <!-- end card body -->
+                                </div> <!-- end card -->
+                            </div> <!-- end col -->
+
+                            <div class="col-md-6">
                                         <div class="card card-animate">
                                             <div class="card-body">
                                                 <div class="d-flex justify-content-between">
@@ -643,11 +674,58 @@ echo "Peak Usage Time: " . implode(', ', $peakUsageTime) . " hours<br>";
                                                 </div>
                                             </div><!-- end card body -->
                                         </div> <!-- end card-->
-                                    </div> <!-- end col-->
-                                </div> <!-- end row-->
-                            </div>
-                        </div> <!-- end col-->
-                    </div> <!-- end row-->
+                             </div> 
+                             <div class="col-md-6">
+                                <div class="card card-animate">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <p class="fw-medium text-muted mb-0">Recognition Speed</p>
+                                                <h2 class="mt-4 ff-secondary fw-semibold">
+                                                    <span class="counter-value" data-target="<?= $recognitionSpeed ?>"><?= $recognitionSpeed ?></span> Seconds
+                                                </h2>
+                                                <p class="mb-0 text-muted">
+                                                    <span class="badge bg-light text-success mb-0">
+                                                        <i class="ri-arrow-up-line align-middle"></i> 2.35 %
+                                                    </span> vs. previous month
+                                                </p>
+                                            </div>
+                                            <div class="avatar-sm flex-shrink-0">
+                                                <span class="avatar-title bg-soft-info rounded-circle fs-2">
+                                                    <i data-feather="clock" class="text-info"></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div><!-- end card body -->
+                                </div> <!-- end card-->
+                            </div> <!-- end col-->
+
+                    <div class="col-md-6">
+                        <div class="card card-animate">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <p class="fw-medium text-muted mb-0">Sign Dataset Size</p>
+                                        <h2 class="mt-4 ff-secondary fw-semibold">
+                                            <span class="counter-value" data-target="<?= $signDatasetSize ?>"><?= $signDatasetSize ?></span> Signs
+                                        </h2>
+                                        <p class="mb-0 text-muted">
+                                            <span class="badge bg-light text-danger mb-0">
+                                                <i class="ri-arrow-down-line align-middle"></i> 1.02 %
+                                            </span> vs. previous month
+                                        </p>
+                                    </div>
+                                    <div class="avatar-sm flex-shrink-0">
+                                        <span class="avatar-title bg-soft-warning rounded-circle fs-2">
+                                            <i data-feather="database" class="text-warning"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div><!-- end card body -->
+                        </div> <!-- end card-->
+                    </div> <!-- end col-->
+
+
 
                     <div class="row">
                         <div class="col-xl-4">
@@ -704,7 +782,8 @@ echo "Peak Usage Time: " . implode(', ', $peakUsageTime) . " hours<br>";
                                 </div>
                                 <!-- end card body -->
                             </div><!-- end card -->
-                        </div><!-- end col -->
+                        </div>
+                    </div><!-- end col -->
 
                         <div class="col-xl-4">
                             <div class="card card-height-100">
@@ -839,6 +918,10 @@ echo "Peak Usage Time: " . implode(', ', $peakUsageTime) . " hours<br>";
                                                     <?= (isset($_GET['statusFilter']) && $_GET['statusFilter'] == 'Unauthorized') ? 'selected' : ''; ?>>
                                                     Unauthorized
                                                 </option>
+                                                <<option value="India" 
+                                                <?= (isset($_GET['statusFilter']) && $_GET['statusFilter'] == 'India') ? 'selected' : ''; ?>>
+                                                India
+                                            </option>
                                             </select>
 
                                             <button type="submit" class="btn btn-primary btn-sm">Apply Filter</button>
@@ -868,7 +951,9 @@ echo "Peak Usage Time: " . implode(', ', $peakUsageTime) . " hours<br>";
                                                     <th scope="col">Location</th>
                                                     <th scope="col">Status</th>
                                                     <th scope="col">Registration Date</th>
+                                                    <th scope="col"></th>
                                                     <th scope="col">Version</th>
+                                                    
                                                 </tr>
                                             </thead>
                                             <tbody id="userTableBody">
@@ -878,18 +963,22 @@ echo "Peak Usage Time: " . implode(', ', $peakUsageTime) . " hours<br>";
                                                 } else {
                                                     $data = json_decode($jsonData, true);
                                                     $statusFilter = isset($_GET['statusFilter']) ? $_GET['statusFilter'] : '';
-                                                    $filteredUsers = array_filter($data, function ($user) use ($statusFilter) {
-                                                        return $statusFilter === '' || (isset($user['status']) && $user['status'] === $statusFilter);
-                                                    });
-                                                    if (!empty($filteredUsers)) {
-                                                        $serialNumber = 1;
-                                                        foreach ($filteredUsers as $user) {
-                                                            displayUserRow($serialNumber++, $user);
-                                                        }
-                                                    } else {
-                                                        echo "<tr><td colspan='8' class='text-center'>No data available for the selected filter.</td></tr>";
-                                                    }
-                                                }
+                                                    $countryFilter = isset($_GET['countryFilter']) ? $_GET['countryFilter'] : '';
+
+                                                     $filteredUsers = array_filter($data, function ($user) use ($statusFilter, $countryFilter) {
+            $statusMatch = $statusFilter === '' || (isset($user['status']) && $user['status'] === $statusFilter);
+            $countryMatch = $countryFilter === '' || (isset($user['location']['country']) && $user['location']['country'] === $countryFilter);
+            return $statusMatch && $countryMatch;
+        });
+        if (!empty($filteredUsers)) {
+            $serialNumber = 1;
+            foreach ($filteredUsers as $user) {
+                displayUserRow($serialNumber++, $user);
+            }
+        } else {
+            echo "<tr><td colspan='8' class='text-center'>No data available for the selected filter.</td></tr>";
+        }
+    }
 
                                                 function displayUserRow($serialNumber, $user)
                                                 {
@@ -1628,32 +1717,38 @@ echo "Peak Usage Time: " . implode(', ', $peakUsageTime) . " hours<br>";
             fetch('https://auth-web-api.onrender.com/api/users') // Replace with the correct path to your JSON file
                 .then(response => response.json())
                 .then(data => {
+                    console.log(data)
+                    const indiaData = data.filter(user => user.location && user.location.country === 'India');
+                    const countries = indiaData.map(user => user.location.country);
                     // Initialize objects to hold user and session counts by country
                     var countryUserCounts = {};
                     var sessionCountsByCountry = {};
 
                     // Loop through the data to aggregate both user and session counts by country
                     data.forEach(user => {
-                        var country = user.location.country;
+                var country = user.location.country;
 
-                        // Aggregate live user counts by country
-                        if (countryUserCounts[country]) {
-                            countryUserCounts[country]++;
-                        } else {
-                            countryUserCounts[country] = 1;
-                        }
+                // Filter for India only
+                if (country === "India") {
+                    // Aggregate live user counts by India
+                    if (countryUserCounts[country]) {
+                        countryUserCounts[country]++;
+                    } else {
+                        countryUserCounts[country] = 1;
+                    }
 
-                        // Aggregate session counts by country (assuming each user represents a session)
-                        if (sessionCountsByCountry[country]) {
-                            sessionCountsByCountry[country]++;
-                        } else {
-                            sessionCountsByCountry[country] = 1;
-                        }
-                    });
+                    // Aggregate session counts by India (assuming each user represents a session)
+                    if (sessionCountsByCountry[country]) {
+                        sessionCountsByCountry[country]++;
+                    } else {
+                        sessionCountsByCountry[country] = 1;
+                    }
+                }
+            });
 
                     // --- Live Users by Country Section (jsVectorMap) ---
                     var map = new jsVectorMap({
-                        map: 'world_merc', // Use the world map
+                        map: 'IN', //for india
                         selector: '#users-by-country', // Target the map container
                         regionStyle: {
                             initial: {
@@ -1677,8 +1772,7 @@ echo "Peak Usage Time: " . implode(', ', $peakUsageTime) . " hours<br>";
 
                     // --- Sessions by Countries Section (ApexCharts) ---
                     var countries = Object.keys(sessionCountsByCountry); // Get the country names
-                    var sessionCounts = Object.values(sessionCountsByCountry); // Get the session counts
-
+                    var sessionCounts = Object.values(sessionCountsByCountry);
                     // Initialize ApexChart for Sessions by Country
                     var sessionChartOptions = {
                         chart: {
@@ -1701,7 +1795,7 @@ echo "Peak Usage Time: " . implode(', ', $peakUsageTime) . " hours<br>";
                             data: sessionCounts // Session counts by country
                         }],
                         xaxis: {
-                            categories: countries, // Country names
+                            categories: ['India'], // Country names
                             labels: {
                                 style: {
                                     colors: [],
