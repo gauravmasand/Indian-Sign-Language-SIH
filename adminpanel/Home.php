@@ -30,7 +30,7 @@ $bounceRate = ($totalSessionTime/$totalSessionTime/20) *100;
 <head>
     <h1>Hello</h1>
     <meta charset="utf-8" />
-    <title>Analytics | Velzon - Admin & Dashboard Template</title>
+    <title>Analytics | Velzon - Admin & Dashboard Template  </title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
     <meta content="Themesbrand" name="author" />
@@ -309,6 +309,9 @@ $bounceRate = ($totalSessionTime/$totalSessionTime/20) *100;
                                         <a href="" class="nav-link" data-key="t-analytics"> Analytics </a>
                                     </li>
                                     <li class="nav-item">
+                                        <a href="recent.php" class="nav-link" data-key="t-analytics">Recent Users</a>
+                                    </li>
+                                    <li class="nav-item">
                                         <a href="chatbot.php" class="nav-link" data-key="t-analytics">Chat Assistant</a>
                                     </li>
 
@@ -355,669 +358,1100 @@ $bounceRate = ($totalSessionTime/$totalSessionTime/20) *100;
                     </div>
                     <!-- end page title -->
 
-                    <div class="row">
-                        <div class="col-xxl-12">
-                            <div class="d-flex flex-column h-100">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="card card-animate">
-                                            <div class="card-body">
-                                                <div class="d-flex justify-content-between">
-                                                    <div>
-                                                        <!-- Displaying the total number of users -->
-                                                        <div>
-                                                            <p class="fw-medium text-muted mb-0">Users</p>
-                                                            <h2 class="mt-4 ff-secondary fw-semibold">
+                    <div class="col-xxl-8">
+    <div class="d-flex flex-column h-100">
+    <div class="row">
+   
 
-                                                                <!-- Dynamically insert total users in data-target and as the content of the span -->
-                                                                <span class="counter-value"
-                                                                    data-target="<?= $totalUsers ?>"><?= $totalUsers ?></span>
-                                                            </h2>
-                                                            <p class="mb-0 text-muted">
-                                                            <span class="badge bg-light text-danger mb-0">
-                                                                <i class="ri-arrow-down-line align-middle"></i> 3.96 %
-                                                            </span> vs. previous month
-                                                        </p>
-                                                        </div>
-                                                    </div>
-                                                    <div>
-                                                        <div class="avatar-sm flex-shrink-0">
-                                                            <span class="avatar-title bg-soft-info rounded-circle fs-2">
-                                                                <i data-feather="users" class="text-info"></i>
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div><!-- end card body -->
-                                        </div> <!-- end card-->
-                                    </div> <!-- end col-->
+<!-- Users Card -->
+<div class="col-md-10">
+    <div class="card card-animate" style="height: 280px; background-color: #F7F6C5;">
+        <div class="card-body">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <p class="fw-medium text-dark mb-0">Users</p>
+                    <h2 class="mt-4 ff-secondary fw-semibold">
+                        <!-- Display Total Users -->
+                        <span id="totalUsers" class="counter-value"></span> <!-- Empty span for dynamic value -->
+                    </h2>
+                    <p class="mb-0 text-muted">
+                        <span class="badge bg-light text-danger mb-0">
+                            <i class="ri-arrow-down-line align-middle"></i> 3.96 %
+                        </span> vs. previous month
+                    </p>
+                </div>
+                <div class="d-flex align-items-center">
+                    <div class="avatar-lg flex-shrink-0">
+                        <span class="avatar-title bg-soft-primary rounded-circle fs-3">
+                            <i data-feather="user" class="text-primary"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
 
-                                    <div class="col-md-6">
-                                        <div class="card card-animate">
-                                            <div class="card-body">
-                                                <div class="d-flex justify-content-between">
-                                                    <div>
-                                                        <p class="fw-medium text-muted mb-0">Sessions</p>
-                                                        <h2 class="mt-4 ff-secondary fw-semibold">
-                                                        <span class="counter-value"
-                                                                    data-target="<?= $totalSessionTime ?>"><?= $totalSessionTime ?></span> Minutes
-                                                        </h2>
+            <!-- Categorize users into Active, Inactive, and Total -->
+            <div class="row mt-4">
+                <div class="col">
+                    <p class="mb-0 text-muted"><b>Active Users</b></p>
+                    <h4 class="mt-2" id="activeUsers"></h4> <!-- Empty for dynamic value -->
+                </div>
+                <div class="col">
+                    <b><p class="mb-0 text-muted"><b>Inactive Users</b></p></b>
+                    <h4 class="mt-2" id="inactiveUsers"></h4> <!-- Empty for dynamic value -->
+                </div>
+            </div>
 
-                                                        <p class="mb-0 text-muted">
-                                                            <span class="badge bg-light text-danger mb-0">
-                                                                <i class="ri-arrow-down-line align-middle"></i> 3.96 %
-                                                            </span> vs. previous month
-                                                        </p>
-                                                    </div>
-                                                    <div class="avatar-sm flex-shrink-0">
-                                                            <span class="avatar-title bg-soft-info rounded-circle fs-2">
-                                                                <i data-feather="users" class="text-info"></i>
-                                                            </span>
-                                                        </div>
-                                                </div>
-                                            </div><!-- end card body -->
-                                        </div> <!-- end card-->
-                                    </div> <!-- end col-->   
+            <div class="position-absolute bottom-0 start-0 mb-4 ms-4">
+                <button id="exportUsersCsv" class="btn btn-primary">Export CSV</button>
+            </div>
+        </div>
+    </div>
+</div>
 
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Function to fetch data from the API
+        function fetchUserData() {
+            // Replace with your API endpoint
+            fetch('https://api.example.com/getUserData') 
+                .then(response => response.json())
+                .then(data => {
+                    // Assuming the API returns an object with totalUsers, activeUsers, and inactiveUsers
+                    var totalUsers = data.totalUsers;
+                    var activeUsers = data.activeUsers;
+                    var inactiveUsers = data.inactiveUsers;
+
+                    // Update the HTML with fetched values
+                    document.getElementById("totalUsers").textContent = 199;
+                    document.getElementById("activeUsers").textContent = activeUsers.toLocaleString();
+                    document.getElementById("inactiveUsers").textContent = inactiveUsers.toLocaleString();
+                })
+                .catch(error => {
+                    console.error('Error fetching user data:', error);
+                    // Handle error appropriately (e.g., display a fallback value or message)
+                    document.getElementById("totalUsers").textContent = 199;
+                    document.getElementById("activeUsers").textContent = "N/A";
+                    document.getElementById("inactiveUsers").textContent = "N/A";
+                });
+        }
+
+        // Fetch user data on page load
+        fetchUserData();
+    });
+    // Export CSV functionality for Users Card
+    document.getElementById("exportUsersCsv").addEventListener("click", function () {
+        const totalUsers = <?= json_encode($totalUsers); ?>; // Ensure PHP value is passed correctly
+        const csvContent = "data:text/csv;charset=utf-8," + "Metric,Value\nTotal Users," + totalUsers;
+
+        const link = document.createElement("a");
+        link.setAttribute("href", encodeURI(csvContent));
+        link.setAttribute("download", "users_data.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+
+    // Export CSV functionality for Sign Dataset Size Card
+</script>
+
+<!-- Include ApexCharts Library -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+
+<!-- //<div class="row"> -->
+   <!-- Container for both charts side by side -->
+   <div class="row">
+    <!-- DAU, WAU, and MAU Chart -->
+    <div class="col-md-11">
+        <div class="card card-animate" style="width: 100%; height: 350px; position: relative;"> <!-- Set consistent card height, larger width, and make it relative -->
+            <div class="card-body" style="height: 100%;"> <!-- Make card body fill the card -->
+                <canvas id="userActivityChart" width="1000" height="300"></canvas> <!-- Adjust canvas size -->
+                <button id="exportCSVButton" class="btn btn-primary" style="position: absolute; bottom: 10px; left: 10px;">Export CSV</button> <!-- Export button at bottom left -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include necessary libraries -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        function fetchData(url) {
+            return fetch(url)
+                .then(response => response.json())
+                .catch(error => {
+                    console.log('Error fetching data:', error);
+                    return { success: [], failure: [] }; // Return empty arrays for success and failure if error occurs
+                });
+        }
+        // DAU, WAU, and MAU Chart
+        var customDAU = 1500;  // Custom DAU value
+        var customWAU = 8000;  // Custom WAU value
+        var customMAU = 22000; // Custom MAU value
+        var ctx1 = document.getElementById('userActivityChart').getContext('2d');
+
+        var userActivityChart = new Chart(ctx1, {
+            type: 'bar', // Specify bar chart
+            data: {
+                labels: ['DAU (Daily Active Users)', 'WAU (Weekly Active Users)', 'MAU (Monthly Active Users)'], // Label for bars
+                datasets: [{
+                    label: 'Active Users', // Label for the bar chart
+                    data: [customDAU, customWAU, customMAU], // Custom data for DAU, WAU, and MAU
+                    backgroundColor: ['#00B0FF', '#A1FCDF', '#009688'], // Sky Blue for DAU, Dark Purple for WAU, Teal for MAU
+                    borderColor: ['#00B0FF', '#A1FCDF', '#009688'], // Matching border color with the bars
+                    borderWidth: 0,
+                    barPercentage: 1, // Control bar width to prevent shrinking
+                    categoryPercentage: 1 // Control space between bars
+                }]
+            },
+            options: {
+                indexAxis: 'y', // Change this to 'y' to make it horizontal
+                animation: {
+                    duration: 0 // Disable animation by setting the duration to 0
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true, // Start the x-axis from 0
+                        title: {
+                            display: true,
+                            text: 'Number of Users'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Metrics'
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return tooltipItem.raw.toLocaleString() + ' users'; // Display number of users
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Function to export chart data as CSV
+        document.getElementById("exportCSVButton").addEventListener("click", function () {
+            var data = userActivityChart.data.datasets[0].data;
+            var labels = userActivityChart.data.labels;
+            var csv = "Metric,Active Users\n"; // CSV header
+
+            // Loop through the data and labels to create CSV rows
+            for (var i = 0; i < labels.length; i++) {
+                csv += labels[i] + "," + data[i] + "\n";
+            }
+
+            // Create a downloadable CSV file
+            var hiddenElement = document.createElement('a');
+            hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+            hiddenElement.target = '_blank';
+            hiddenElement.download = 'user_activity_data.csv'; // File name
+            hiddenElement.click();
+        });
+    });
+</script>
+
+
+<div class="row">
+    <!-- Daily Active Users (24 hours) -->
     <div class="col-md-6">
+        <div class="card card-animate" style="width: 100%; height: 500px; position: relative;">
+            <div class="card-body" style="height: 100%;">
+                <canvas id="dailyChart" width="500" height="300"></canvas>
+                <div class="metrics" style="padding: 10px;">
+                    <p><b>Total Users:</b> <span id="dailyTotalUsers">0</span></p>
+                    <p><b>Active Users:</b> <span id="dailyActiveUsers">0</span></p>
+                    <p><b>Inactive Users:</b> <span id="dailyInactiveUsers">0</span></p>
+                    <p><b>Total Session Time:</b> <span id="dailyTotalSessionTime">0 mins</span></p>
+                    <p><b>Average Session Time:</b> <span id="dailyAvgSessionTime">0 mins</span></p>
+                </div>
+                <button id="exportDailyCSV" class="btn btn-primary" style="position: absolute; bottom: 10px; left: 10px;">Export CSV</button>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Weekly Active Users (7 days) -->
+    <div class="col-md-6">
+        <div class="card card-animate" style="width: 100%; height: 500px; position: relative;">
+            <div class="card-body" style="height: 100%;">
+                <canvas id="weeklyChart" width="500" height="300"></canvas>
+                <div class="metrics" style="padding: 10px;">
+                    <p><b>Total Users:</b> <span id="weeklyTotalUsers">0</span></p>
+                    <p><b>Active Users:</b> <span id="weeklyActiveUsers">0</span></p>
+                    <p><b>Inactive Users:</b> <span id="weeklyInactiveUsers">0</span></p>
+                    <p><b>Total Session Time:</b> <span id="weeklyTotalSessionTime">0 mins</span></p>
+                    <p><b>Average Session Time:</b> <span id="weeklyAvgSessionTime">0 mins</span></p>
+                </div>
+                <button id="exportWeeklyCSV" class="btn btn-primary" style="position: absolute; bottom: 10px; left: 10px;">Export CSV</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Active Users (4 weeks) -->
+    <div class="col-md-6">
+        <div class="card card-animate" style="width: 100%; height: 500px; position: relative;">
+            <div class="card-body" style="height: 100%;">
+                <canvas id="monthlyChart" width="500" height="300"></canvas>
+                <div class="metrics" style="padding: 10px;">
+                    <p><b>Total Users:</b> <span id="monthlyTotalUsers">0</span></p>
+                    <p><b>Active Users:</b> <span id="monthlyActiveUsers">0</span></p>
+                    <p><b>Inactive Users:</b> <span id="monthlyInactiveUsers">0</span></p>
+                    <p><b>Total Session Time:</b> <span id="monthlyTotalSessionTime">0 mins</span></p>
+                    <p><b>Average Session Time:</b> <span id="monthlyAvgSessionTime">0 mins</span></p>
+                </div>
+                <button id="exportMonthlyCSV" class="btn btn-primary" style="position: absolute; bottom: 10px; left: 10px;">Export CSV</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script> <!-- Add this line for datalabels -->
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Simulated API call to fetch data (replace with actual API call)
+        function fetchData(url) {
+            return fetch(url)
+                .then(response => response.json())
+                .catch(error => {
+                    console.log('Error fetching data:', error);
+                    return { success: [], failure: [] }; // Return empty arrays for success and failure if error occurs
+                });
+        }
+
+        // Fetch and render the Daily Active Users and API success/failure chart
+        fetchData('https://api.example.com/daily-users')
+            .then(dailyData => {
+                if (dailyData.success.length === 0) {
+                    dailyData = {
+                        success: [120, 150, 180, 220, 170, 200, 250, 180, 160, 140, 200, 240, 300, 260, 220, 200, 190, 170, 180, 220, 210, 240, 250, 300],
+                        failure: [10, 15, 20, 30, 20, 25, 30, 25, 20, 15, 25, 30, 40, 35, 30, 25, 20, 25, 30, 35, 25, 30, 35, 40] // Default data if fetch fails
+                    };
+                }
+
+                var successRate = dailyData.success.map((value, index) => (value / (value + dailyData.failure[index])) * 100);
+                var failureRate = dailyData.failure.map((value, index) => (value / (value + dailyData.success[index])) * 100);
+
+                var ctxDaily = document.getElementById('dailyChart').getContext('2d');
+                var dailyChart = new Chart(ctxDaily, {
+                    type: 'bar',
+                    data: {
+                        labels: Array.from({ length: 24 }, (_, i) => `${i}:00`), // Hourly labels
+                        datasets: [{
+                            label: 'DAU Success Rate (%)',
+                            data: successRate, // Success rate
+                            backgroundColor: '#880D1E',
+                            borderColor: '#880D1E',
+                            borderWidth: 1,
+                            datalabels: {
+                                align: 'top',
+                                color: 'white',
+                                font: { weight: 'bold' },
+                                formatter: function(value) {
+                                    return value.toFixed(2) + '%'; // Show percentage with 2 decimal places
+                                }
+                            }
+                        }, {
+                            label: 'DAU Failure Rate (%)',
+                            data: failureRate, // Failure rate
+                            backgroundColor: '#DD2D4A',
+                            borderColor: '#DD2D4A',
+                            borderWidth: 1,
+                            datalabels: {
+                                align: 'bottom',
+                                color: 'white',
+                                font: { weight: 'bold' },
+                                formatter: function(value) {
+                                    return value.toFixed(2) + '%'; // Show percentage with 2 decimal places
+                                }
+                            }
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            x: { title: { display: true, text: 'Time (Hours)' } },
+                            y: { beginAtZero: true, title: { display: true, text: 'Percentage' }, max: 100 }
+                        },
+                        plugins: {
+                            datalabels: {
+                                display: true, // Enable labels to be shown
+                            }
+                        }
+                    }
+                });
+            });
+
+        // Fetch and render the Weekly Active Users and API success/failure chart
+        fetchData('https://api.example.com/weekly-users')
+            .then(weeklyData => {
+                if (weeklyData.success.length === 0) {
+                    weeklyData = {
+                        success: [1500, 1600, 1400, 1700, 1800, 1900, 2000],
+                        failure: [50, 60, 40, 70, 80, 90, 100] // Default data if fetch fails
+                    };
+                }
+
+                var successRate = weeklyData.success.map((value, index) => (value / (value + weeklyData.failure[index])) * 100);
+                var failureRate = weeklyData.failure.map((value, index) => (value / (value + weeklyData.success[index])) * 100);
+
+                var ctxWeekly = document.getElementById('weeklyChart').getContext('2d');
+                var weeklyChart = new Chart(ctxWeekly, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+                        datasets: [{
+                            label: 'WAU Success Rate (%)',
+                            data: successRate, // Success rate
+                            backgroundColor: '#457B9D',
+                            borderColor: '#457B9D',
+                            borderWidth: 1,
+                            datalabels: {
+                                align: 'top',
+                                color: 'white',
+                                font: { weight: 'bold' },
+                                formatter: function(value) {
+                                    return value.toFixed(2) + '%'; // Show percentage with 2 decimal places
+                                }
+                            }
+                        }, {
+                            label: 'WAU Failure Rate (%)',
+                            data: failureRate, // Failure rate
+                            backgroundColor: '#1D3557',
+                            borderColor: '#1D3557',
+                            borderWidth: 1,
+                            datalabels: {
+                                align: 'bottom',
+                                color: 'white',
+                                font: { weight: 'bold' },
+                                formatter: function(value) {
+                                    return value.toFixed(2) + '%'; // Show percentage with 2 decimal places
+                                }
+                            }
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            x: { title: { display: true, text: 'Day' } },
+                            y: { beginAtZero: true, title: { display: true, text: 'Percentage' }, max: 100 }
+                        },
+                        plugins: {
+                            datalabels: {
+                                display: true, // Enable labels to be shown
+                            }
+                        }
+                    }
+                });
+            });
+
+        // Fetch and render the Monthly Active Users and API success/failure chart
+        fetchData('https://api.example.com/monthly-users')
+            .then(monthlyData => {
+                if (monthlyData.success.length === 0) {
+                    monthlyData = {
+                        success: [22000, 23000, 25000, 28000],
+                        failure: [500, 600, 400, 700] // Default data if fetch fails
+                    };
+                }
+
+                var successRate = monthlyData.success.map((value, index) => (value / (value + monthlyData.failure[index])) * 100);
+                var failureRate = monthlyData.failure.map((value, index) => (value / (value + monthlyData.success[index])) * 100);
+
+                var ctxMonthly = document.getElementById('monthlyChart').getContext('2d');
+                var monthlyChart = new Chart(ctxMonthly, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                        datasets: [{
+                            label: 'MAU Success Rate (%)',
+                            data: successRate, // Success rate
+                            backgroundColor: '#673AB7',
+                            borderColor: '#673AB7',
+                            borderWidth: 1,
+                            datalabels: {
+                                align: 'top',
+                                color: 'white',
+                                font: { weight: 'bold' },
+                                formatter: function(value) {
+                                    return value.toFixed(2) + '%'; // Show percentage with 2 decimal places
+                                }
+                            }
+                        }, {
+                            label: 'MAU Failure Rate (%)',
+                            data: failureRate, // Failure rate
+                            backgroundColor: '#8D6E63',
+                            borderColor: '#8D6E63',
+                            borderWidth: 1,
+                            datalabels: {
+                                align: 'bottom',
+                                color: 'white',
+                                font: { weight: 'bold' },
+                                formatter: function(value) {
+                                    return value.toFixed(2) + '%'; // Show percentage with 2 decimal places
+                                }
+                            }
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            x: { title: { display: true, text: 'Weeks' } },
+                            y: { beginAtZero: true, title: { display: true, text: 'Percentage' }, max: 100 }
+                        },
+                        plugins: {
+                            datalabels: {
+                                display: true, // Enable labels to be shown
+                            }
+                        }
+                    }
+                });
+            });
+    });
+</script>
+
+
+
+<!-- Include necessary libraries -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Simulated API call to fetch data (replace with actual API call)
+        function fetchData(url) {
+            return fetch(url)
+                .then(response => response.json())
+                .catch(error => {
+                    console.log('Error fetching data:', error);
+                    return []; // Return an empty array if there's an error fetching data
+                });
+        }
+
+        // Fetch and render the Daily Active Users chart
+        fetchData('https://api.example.com/daily-users')
+            .then(dailyData => {
+                if (dailyData.length === 0) {
+                    dailyData = [120, 150, 180, 220, 170, 200, 250, 180, 160, 140, 200, 240, 300, 260, 220, 200, 190, 170, 180, 220, 210, 240, 250, 300]; // Default data if fetch fails
+                }
+
+                var ctxDaily = document.getElementById('dailyChart').getContext('2d');
+                var dailyChart = new Chart(ctxDaily, {
+                    type: 'line',
+                    data: {
+                        labels: Array.from({ length: 24 }, (_, i) => `${i}:00`), // Hourly labels
+                        datasets: [{
+                            label: 'DAU (24 Hours)',
+                            data: dailyData, // Using fetched data
+                            borderColor: '#FB5607', // New color (Red-Orange)
+                            backgroundColor: '#FED9B7',
+                            fill: true,
+                            tension: 0.1,
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            x: { title: { display: true, text: 'Time (Hours)' } },
+                            y: { beginAtZero: true, title: { display: true, text: 'Active Users' } }
+                        }
+                    }
+                });
+            });
+
+        // Fetch and render the Weekly Active Users chart
+        fetchData('https://api.example.com/weekly-users')
+            .then(weeklyData => {
+                if (weeklyData.length === 0) {
+                    weeklyData = [1500, 1600, 1400, 1700, 1800, 1900, 2000]; // Default data if fetch fails
+                }
+
+                var ctxWeekly = document.getElementById('weeklyChart').getContext('2d');
+                var weeklyChart = new Chart(ctxWeekly, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+                        datasets: [{
+                            label: 'WAU (7 Days)',
+                            data: weeklyData, // Using fetched data
+                            backgroundColor: '#457B9D', // New color (Green)
+                            borderColor: '#388E3C',
+                            borderWidth: 1,
+                            barPercentage: 0.5,
+                            categoryPercentage: 0.6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            x: { title: { display: true, text: 'Day' } },
+                            y: { beginAtZero: true, title: { display: true, text: 'Active Users' } }
+                        }
+                    }
+                });
+            });
+
+        // Fetch and render the Monthly Active Users chart
+        fetchData('https://api.example.com/monthly-users')
+            .then(monthlyData => {
+                if (monthlyData.length === 0) {
+                    monthlyData = [22000, 23000, 25000, 28000]; // Default data if fetch fails
+                }
+
+                var ctxMonthly = document.getElementById('monthlyChart').getContext('2d');
+                var monthlyChart = new Chart(ctxMonthly, {
+                    type: 'line',
+                    data: {
+                        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                        datasets: [{
+                            label: 'MAU (4 Weeks)',
+                            data: monthlyData, // Using fetched data
+                            borderColor: '#673AB7', // New color (Purple)
+                            backgroundColor: '#00B4D8',
+                            fill: true,
+                            tension: 0.1,
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            x: { title: { display: true, text: 'Weeks' } },
+                            y: { beginAtZero: true, title: { display: true, text: 'Active Users' } }
+                        }
+                    }
+                });
+            });
+
+        // Export Daily Chart data as CSV
+        document.getElementById("exportDailyCSV").addEventListener("click", function () {
+            fetchData('https://api.example.com/daily-users').then(dailyData => {
+                var csv = "Hour,Active Users\n";
+                dailyData.forEach((value, index) => {
+                    csv += `${index}:00,${value}\n`;
+                });
+                var hiddenElement = document.createElement('a');
+                hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+                hiddenElement.target = '_blank';
+                hiddenElement.download = 'daily_active_users.csv';
+                hiddenElement.click();
+            });
+        });
+
+        // Export Weekly Chart data as CSV
+        document.getElementById("exportWeeklyCSV").addEventListener("click", function () {
+            fetchData('https://api.example.com/weekly-users').then(weeklyData => {
+                var csv = "Day,Active Users\n";
+                weeklyData.forEach((value, index) => {
+                    csv += ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][index] + ',' + value + '\n';
+                });
+                var hiddenElement = document.createElement('a');
+                hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+                hiddenElement.target = '_blank';
+                hiddenElement.download = 'weekly_active_users.csv';
+                hiddenElement.click();
+            });
+        });
+
+        // Export Monthly Chart data as CSV
+        document.getElementById("exportMonthlyCSV").addEventListener("click", function () {
+            fetchData('https://api.example.com/monthly-users').then(monthlyData => {
+                var csv = "Week,Active Users\n";
+                monthlyData.forEach((value, index) => {
+                    csv += `Week ${index + 1},${value}\n`;
+                });
+                var hiddenElement = document.createElement('a');
+                hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+                hiddenElement.target = '_blank';
+                hiddenElement.download = 'monthly_active_users.csv';
+                hiddenElement.click();
+            });
+        });
+    });
+</script>
+
+
+
+<div class="row">
+    <!-- Peak Traffic Time Card -->
+    <div class="col-md-4">
         <div class="card card-animate">
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <div>
-                        <p class="fw-medium text-muted mb-0">API Success Rate</p>
-                        <h2 class="mt-4 ff-secondary fw-semibold">
-                            <span class="counter-value" data-target="<?= $apiSuccessRate ?>"><?= $apiSuccessRate ?>%</span>
-                        </h2>
+                        <p class="fw-medium text-muted mb-0">Peak Traffic Time</p>
                     </div>
-                    <div>
-                        <div class="avatar-sm flex-shrink-0">
-                            <span class="avatar-title bg-soft-info rounded-circle fs-2">
-                                <i data-feather="server" class="text-info"></i>
-                            </span>
-                        </div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-soft-primary rounded-circle fs-2">
+                        <i data-feather="clock" class="text-warning"></i>
+                        </span>
                     </div>
                 </div>
+                <!-- Bar Chart for Peak Traffic Time -->
+                <div id="peakTrafficChart" style="height: 250px;"></div>
+                <button id="exportPeakTraffic" class="btn btn-primary mt-3">Export CSV</button>
             </div>
         </div>
     </div>
+
+    <!-- Avg. Daily Time Spent Card -->
+    <div class="col-md-4">
+        <div class="card card-animate">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <p class="fw-medium text-muted mb-0">Avg. Daily Time Spent</p>
+                    </div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-soft-warning rounded-circle fs-2">
+                            <i data-feather="clock" class="text-warning"></i>
+                        </span>
+                    </div>
+                </div>
+                <!-- Bar Chart for Avg. Daily Time Spent -->
+                <div id="avgDailyTimeChart" style="height: 250px;"></div>
+                <button id="exportAvgDailyTime" class="btn btn-primary mt-3">Export CSV</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Avg. Session Duration Card -->
+    <div class="col-md-4">
+        <div class="card card-animate">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <p class="fw-medium text-muted mb-0">Avg. Session Duration</p>
+                    </div>
+                    <div class="avatar-sm flex-shrink-0">
+                        <span class="avatar-title bg-soft-danger rounded-circle fs-2">
+                            <i data-feather="clock" class="text-warning"></i>
+                        </span>
+                    </div>
+                </div>
+                <!-- Bar Chart for Avg. Session Duration -->
+                <div id="avgSessionChart" style="height: 250px;"></div>
+                <button id="exportAvgSession" class="btn btn-primary mt-3">Export CSV</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Ensure PHP variables are set; default values if undefined
+        var peakTrafficTime = <?= isset($peakTrafficTime) ? $peakTrafficTime : 12 ?>;
+        var avgDailyTime = <?= isset($avgDailyTime) ? $avgDailyTime : 30 ?>;
+        var avgSessionDuration = <?= isset($avgSessionDuration) ? $avgSessionDuration : 20 ?>;
+
+        // Bar Chart Configuration
+        var peakTrafficOptions = {
+            chart: { type: 'bar', height: 250 },
+            series: [{ name: 'Peak Traffic Time', data: [peakTrafficTime] }],
+            xaxis: { categories: ['Metrics'] },
+            yaxis: { title: { text: 'Time (minutes)' } },
+            colors: ['#FF6F61'],
+        };
+        var avgDailyTimeOptions = {
+            chart: { type: 'bar', height: 250 },
+            series: [{ name: 'Avg. Daily Time Spent', data: [avgDailyTime] }],
+            xaxis: { categories: ['Metrics'] },
+            yaxis: { title: { text: 'Time (minutes)' } },
+            colors: ['#6A5ACD'],
+        };
+        var avgSessionOptions = {
+            chart: { type: 'bar', height: 250 },
+            series: [{ name: 'Avg. Session Duration', data: [avgSessionDuration] }],
+            xaxis: { categories: ['Metrics'] },
+            yaxis: { title: { text: 'Time (minutes)' } },
+            colors: ['#98FF98'],
+        };
+
+        // Render the charts
+        var peakTrafficChart = new ApexCharts(document.querySelector("#peakTrafficChart"), peakTrafficOptions);
+        peakTrafficChart.render();
+        var avgDailyTimeChart = new ApexCharts(document.querySelector("#avgDailyTimeChart"), avgDailyTimeOptions);
+        avgDailyTimeChart.render();
+        var avgSessionChart = new ApexCharts(document.querySelector("#avgSessionChart"), avgSessionOptions);
+        avgSessionChart.render();
+
+        // Export CSV Function
+        function exportCSV(chart, chartName) {
+            const series = chart.w.globals.series[0];
+            const labels = chart.w.globals.labels;
+            let csvContent = "data:text/csv;charset=utf-8,Label,Value\n";
+
+            // Append data to CSV
+            labels.forEach((label, index) => {
+                csvContent += `${label},${series[index]}\n`;
+            });
+
+            // Create a downloadable link
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", chartName + ".csv");
+            document.body.appendChild(link);
+
+            // Trigger download
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Attach Export Button Events
+        document.getElementById("exportPeakTraffic").addEventListener("click", function () {
+            exportCSV(peakTrafficChart, "PeakTrafficTime");
+        });
+        document.getElementById("exportAvgDailyTime").addEventListener("click", function () {
+            exportCSV(avgDailyTimeChart, "AvgDailyTimeSpent");
+        });
+        document.getElementById("exportAvgSession").addEventListener("click", function () {
+            exportCSV(avgSessionChart, "AvgSessionDuration");
+        });
+    });
+</script>
+
+
+
+<div class="row">
+    <!-- API Success Rate -->
+    <div class="col-md-6">
+        <div class="card card-animate" style="height: 350px;"> <!-- Adjust card height -->
+            <div class="card-body">
+                <h5 class="fw-medium text-muted mb-3">API Success Rate</h5>
+                <canvas id="apiSuccessRateChart" style="width: 100%; height: 200px;"></canvas>
+                <button id="exportApiSuccessRate" class="btn btn-primary mt-3">Export CSV</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Failed API Calls -->
     <div class="col-md-6">
-        <div class="card card-animate">
+        <div class="card card-animate" style="height: 350px;"> <!-- Adjust card height -->
             <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <p class="fw-medium text-muted mb-0">Failed API Calls</p>
-                        <h2 class="mt-4 ff-secondary fw-semibold">
-                            <span class="counter-value" data-target="<?= $failedApiCalls ?>"><?= $failedApiCalls ?></span>
-                        </h2>
-                    </div>
-                    <div>
-                        <div class="avatar-sm flex-shrink-0">
-                            <span class="avatar-title bg-soft-danger rounded-circle fs-2">
-                                <i data-feather="alert-circle" class="text-danger"></i>
-                            </span>
-                        </div>
-                    </div>
-                </div>
+                <h5 class="fw-medium text-muted mb-3">Failed API Calls</h5>
+                <canvas id="failedApiCallsChart" style="width: 100%; height: 200px;"></canvas>
+                <button id="exportFailedApiCalls" class="btn btn-primary mt-3">Export CSV</button>
             </div>
         </div>
     </div>
+</div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // API Success Rate Data
+    var successRateData = {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], // Example months
+        datasets: [{
+            label: 'Success Rate (%)',
+            data: [85, 88, 92, 95, 90, 93], // Example success rate values
+            fill: true,
+            backgroundColor: 'rgba(54, 162, 235, 0.2)', // Light blue fill
+            borderColor: 'rgba(54, 162, 235, 1)', // Blue border
+            pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+            tension: 0.4 // Smooth curve
+        }]
+    };
 
-    <!-- Server Uptime -->
-    <div class="col-md-6">
-        <div class="card card-animate">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <p class="fw-medium text-muted mb-0">Server Uptime</p>
-                        <h2 class="mt-4 ff-secondary fw-semibold">
-                            <span class="counter-value" data-target="<?= $serverUptime ?>"><?= $serverUptime ?> hrs</span>
-                        </h2>
-                    </div>
-                    <div>
-                        <div class="avatar-sm flex-shrink-0">
-                            <span class="avatar-title bg-soft-success rounded-circle fs-2">
-                                <i data-feather="monitor" class="text-success"></i>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Server Downtime -->
-    <div class="col-md-6">
-        <div class="card card-animate">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <p class="fw-medium text-muted mb-0">Server Downtime</p>
-                        <h2 class="mt-4 ff-secondary fw-semibold">
-                            <span class="counter-value" data-target="<?= $downtime ?>"><?= $downtime ?> hrs</span>
-                        </h2>
-                    </div>
-                    <div>
-                        <div class="avatar-sm flex-shrink-0">
-                            <span class="avatar-title bg-soft-danger rounded-circle fs-2">
-                                <i data-feather="server" class="text-danger"></i>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-                                    <!-- Peak Traffic Time -->
-                                    <div class="col-md-6">
-                                        <div class="card card-animate">
-                                            <div class="card-body">
-                                                <div class="d-flex justify-content-between">
-                                                    <div>
-                                                        <p class="fw-medium text-muted mb-0">Peak Traffic Time</p>
-                                                        <h2 class="mt-4 ff-secondary fw-semibold">
-                                                            <span class="counter-value" data-target="<?= $peakTrafficTime ?>"><?= $peakTrafficTime ?></span>
-                                                        </h2>
-                                                    </div>
-                                                    <div>
-                                                        <div class="avatar-sm flex-shrink-0">
-                                                            <span class="avatar-title bg-soft-warning rounded-circle fs-2">
-                                                                <i data-feather="clock" class="text-warning"></i>
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <!-- Average Daily Time Spent -->
-                                    <div class="col-md-6">
-                                        <div class="card card-animate">
-                                            <div class="card-body">
-                                                <div class="d-flex justify-content-between">
-                                                    <div>
-                                                        <p class="fw-medium text-muted mb-0">Avg. Daily Time Spent</p>
-                                                        <h2 class="mt-4 ff-secondary fw-semibold">
-                                                            <span class="counter-value" data-target="<?= $avgDailyTime ?>"><?= $avgDailyTime ?> mins</span>
-                                                        </h2>
-                                                    </div>
-                                                    <div>
-                                                        <div class="avatar-sm flex-shrink-0">
-                                                            <span class="avatar-title bg-soft-warning rounded-circle fs-2">
-                                                                <i data-feather="clock" class="text-warning"></i>
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                <!-- User Engagement Rate -->
-                                <div class="col-md-6">
-                                    <div class="card card-animate">
-                                        <div class="card-body">
-                                            <div class="d-flex justify-content-between">
-                                                <div>
-                                                    <p class="fw-medium text-muted mb-0">Engagement Rate</p>
-                                                    <h2 class="mt-4 ff-secondary fw-semibold">
-                                                        <span class="counter-value" data-target="<?= $engagementRate ?>"><?= $engagementRate ?>%</span>
-                                                    </h2>
-                                                </div>
-                                                <div>
-                                                    <div class="avatar-sm flex-shrink-0">
-                                                        <span class="avatar-title bg-soft-success rounded-circle fs-2">
-                                                            <i data-feather="activity" class="text-success"></i>
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                        <div class="card card-animate">
-                                            <div class="card-body">
-                                                <div class="d-flex justify-content-between">
-                                                    <div>
-                                                        <p class="fw-medium text-muted mb-0">Avg. Session Duration</p>
-                                                        <h2 class="mt-4 ff-secondary fw-semibold">
-                                                            <span class="counter-value" data-target="<?= $avgSessionDuration ?>"><?= $avgSessionDuration ?> mins</span>
-                                                        </h2>
-                                                    </div>
-                                                    <div>
-                                                        <div class="avatar-sm flex-shrink-0">
-                                                            <span class="avatar-title bg-soft-success rounded-circle fs-2">
-                                                                <i data-feather="clock" class="text-success"></i>
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                </div>
-                                    
-                            
-                                    <!-- Daily Active Users (DAU) -->
-                                <div class="col-md-6">
-                                    <div class="card card-animate">
-                                    <div class="card-body">
-                                        <div class="d-flex justify-content-between">
-                                            <div>
-                                                <p class="fw-medium text-muted mb-0">Daily Active Users (DAU)</p>
-                                                <h2 class="mt-4 ff-secondary fw-semibold">
-                                                    <span class="counter-value" data-target="<?= $dau ?>"><?= $dau ?></span>
-                                                </h2>
-                                                <p class="mb-0 text-muted">
-                                                    <span class="badge bg-light text-success mb-0">
-                                                        <i class="ri-arrow-up-line align-middle"></i> 5.43 %
-                                                    </span> vs. previous month
-                                                </p>
-                                            </div>
-                                            <div class="avatar-sm flex-shrink-0">
-                                                <span class="avatar-title bg-soft-warning rounded-circle fs-2">
-                                                    <i data-feather="smartphone" class="text-warning"></i>
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div> <!-- end card body -->
-                                    </div> <!-- end card -->
-                                </div> <!-- end col -->
-
-                            <!-- Monthly Active Users (MAU) -->
-                            <div class="col-md-6">
-                                <div class="card card-animate">
-                                    <div class="card-body">
-                                        <div class="d-flex justify-content-between">
-                                            <div>
-                                                <p class="fw-medium text-muted mb-0">Monthly Active Users (MAU)</p>
-                                                <h2 class="mt-4 ff-secondary fw-semibold">
-                                                    <span class="counter-value" data-target="<?= $mau ?>"><?= $mau ?></span>
-                                                </h2>
-                                                <p class="mb-0 text-muted">
-                                                    <span class="badge bg-light text-danger mb-0">
-                                                        <i class="ri-arrow-down-line align-middle"></i> 2.13 %
-                                                    </span> vs. previous month
-                                                </p>
-                                            </div>
-                                            <div class="avatar-sm flex-shrink-0">
-                                                <span class="avatar-title bg-soft-info rounded-circle fs-2">
-                                                    <i data-feather="smartphone" class="text-info"></i>
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div> <!-- end card body -->
-                                </div> <!-- end card -->
-                            </div> <!-- end col -->
-
-                            <div class="col-md-6">
-                                        <div class="card card-animate">
-                                            <div class="card-body">
-                                                <div class="d-flex justify-content-between">
-                                                    <div>
-                                                        <p class="fw-medium text-muted mb-0">Bounce Rate</p>
-                                                        <h2 class="mt-4 ff-secondary fw-semibold"> <span class="counter-value"
-                                                        data-target="<?= $bounceRate ?>"><?= $bounceRate?></span>%</h2>
-                                                        <p class="mb-0 text-muted"><span
-                                                                class="badge bg-light text-success mb-0"> <i
-                                                                    class="ri-arrow-up-line align-middle"></i> 7.05 %
-                                                            </span> vs. previous month</p>
-                                                    </div>
-                                                    <div>
-                                                        <div class="avatar-sm flex-shrink-0">
-                                                            <span class="avatar-title bg-soft-info rounded-circle fs-2">
-                                                                <i data-feather="external-link" class="text-info"></i>
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div><!-- end card body -->
-                                        </div> <!-- end card-->
-                             </div> 
-                             <div class="col-md-6">
-                                <div class="card card-animate">
-                                    <div class="card-body">
-                                        <div class="d-flex justify-content-between">
-                                            <div>
-                                                <p class="fw-medium text-muted mb-0">Recognition Speed</p>
-                                                <h2 class="mt-4 ff-secondary fw-semibold">
-                                                    <span class="counter-value" data-target="<?= $recognitionSpeed ?>"><?= $recognitionSpeed ?></span> Seconds
-                                                </h2>
-                                                <p class="mb-0 text-muted">
-                                                    <span class="badge bg-light text-success mb-0">
-                                                        <i class="ri-arrow-up-line align-middle"></i> 2.35 %
-                                                    </span> vs. previous month
-                                                </p>
-                                            </div>
-                                            <div class="avatar-sm flex-shrink-0">
-                                                <span class="avatar-title bg-soft-info rounded-circle fs-2">
-                                                    <i data-feather="clock" class="text-info"></i>
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div><!-- end card body -->
-                                </div> <!-- end card-->
-                            </div> <!-- end col-->
-
-                    <div class="col-md-6">
-                        <div class="card card-animate">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <p class="fw-medium text-muted mb-0">Sign Dataset Size</p>
-                                        <h2 class="mt-4 ff-secondary fw-semibold">
-                                            <span class="counter-value" data-target="<?= $signDatasetSize ?>"><?= $signDatasetSize ?></span> Signs
-                                        </h2>
-                                        <p class="mb-0 text-muted">
-                                            <span class="badge bg-light text-danger mb-0">
-                                                <i class="ri-arrow-down-line align-middle"></i> 1.02 %
-                                            </span> vs. previous month
-                                        </p>
-                                    </div>
-                                    <div class="avatar-sm flex-shrink-0">
-                                        <span class="avatar-title bg-soft-warning rounded-circle fs-2">
-                                            <i data-feather="database" class="text-warning"></i>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div><!-- end card body -->
-                        </div> <!-- end card-->
-                    </div> <!-- end col-->
-
-
-
-                    <div class="row">
-                        <div class="col-xl-4">
-                            <div class="card card-height-100">
-                                <div class="card-header align-items-center d-flex">
-                                    <h4 class="card-title mb-0 flex-grow-1">Live Users By Country</h4>
-                                    <div class="flex-shrink-0">
-                                        <button type="button" class="btn btn-soft-primary btn-sm">
-                                            Export Report
-                                        </button>
-                                    </div>
-                                </div><!-- end card header -->
-
-                                <!-- card body -->
-                                <div class="card-body">
-                                    <div id="users-by-country" data-colors='["--vz-light"]' class="text-center"
-                                        style="height: 252px"></div>
-
-                                    <div class="table-responsive table-card mt-3">
-                                        <table
-                                            class="table table-borderless table-sm table-centered align-middle table-nowrap mb-1">
-                                            <thead
-                                                class="text-muted border-dashed border border-start-0 border-end-0 bg-soft-light">
-                                                <tr>
-                                                    <th>Duration (Secs)</th>
-                                                    <th style="width: 30%;">Sessions</th>
-                                                    <th style="width: 30%;">Views</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody class="border-0">
-                                                <tr>
-                                                    <td>0-30</td>
-                                                    <td>2,250</td>
-                                                    <td>4,250</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>31-60</td>
-                                                    <td>1,501</td>
-                                                    <td>2,050</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>61-120</td>
-                                                    <td>750</td>
-                                                    <td>1,600</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>121-240</td>
-                                                    <td>540</td>
-                                                    <td>1,040</td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                <!-- end card body -->
-                            </div><!-- end card -->
-                        </div>
-                    </div><!-- end col -->
-
-                        <div class="col-xl-4">
-                            <div class="card card-height-100">
-                                <div class="card-header align-items-center d-flex">
-                                    <h4 class="card-title mb-0 flex-grow-1">Sessions by Countries</h4>
-                                    <div>
-                                        <button type="button" class="btn btn-soft-secondary btn-sm">
-                                            ALL
-                                        </button>
-                                        <button type="button" class="btn btn-soft-primary btn-sm">
-                                            1M
-                                        </button>
-                                        <button type="button" class="btn btn-soft-secondary btn-sm">
-                                            6M
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="card-body p-0">
-                                    <div>
-                                        <div id="countries_charts"
-                                            data-colors='["--vz-info", "--vz-info", "--vz-info", "--vz-info", "--vz-danger", "--vz-info", "--vz-info", "--vz-info", "--vz-info", "--vz-info"]'
-                                            class="apex-charts" dir="ltr"></div>
-                                    </div>
-                                </div><!-- end card body -->
-                            </div><!-- end card -->
-                        </div> <!-- end col -->
-
-                        <div class="col-xl-4">
-                            <div class="card card-height-100">
-                                <div class="card-header align-items-center d-flex">
-                                    <h4 class="card-title mb-0 flex-grow-1">Users by Device</h4>
-                                    <div class="flex-shrink-0">
-                                        <div class="dropdown card-header-dropdown">
-                                            <a class="text-reset dropdown-btn" href="#" data-bs-toggle="dropdown"
-                                                aria-haspopup="true" aria-expanded="false">
-                                                <span class="text-muted fs-16"><i
-                                                        class="mdi mdi-dots-vertical align-middle"></i></span>
-                                            </a>
-                                            <div class="dropdown-menu dropdown-menu-end">
-                                                <a class="dropdown-item" href="#">Today</a>
-                                                <a class="dropdown-item" href="#">Last Week</a>
-                                                <a class="dropdown-item" href="#">Last Month</a>
-                                                <a class="dropdown-item" href="#">Current Year</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div><!-- end card header -->
-                                <div class="card-body">
-                                    <div id="user_device_pie_charts"
-                                        data-colors='["--vz-primary", "--vz-warning", "--vz-info"]' class="apex-charts"
-                                        dir="ltr"></div>
-
-                                    <div class="table-responsive mt-3">
-                                        <table
-                                            class="table table-borderless table-sm table-centered align-middle table-nowrap mb-0">
-                                            <tbody class="border-0">
-                                                <tr>
-                                                    <td>
-                                                        <h4 class="text-truncate fs-14 fs-medium mb-0"><i
-                                                                class="ri-stop-fill align-middle fs-18 text-primary me-2"></i>Desktop
-                                                            Users</h4>
-                                                    </td>
-                                                    <td>
-                                                        <p class="text-muted mb-0"><i data-feather="users"
-                                                                class="me-2 icon-sm"></i>78.56k</p>
-                                                    </td>
-                                                    <td class="text-end">
-                                                        <p class="text-success fw-medium fs-12 mb-0"><i
-                                                                class="ri-arrow-up-s-fill fs-5 align-middle"></i>2.08%
-                                                        </p>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>
-                                                        <h4 class="text-truncate fs-14 fs-medium mb-0"><i
-                                                                class="ri-stop-fill align-middle fs-18 text-warning me-2"></i>Mobile
-                                                            Users</h4>
-                                                    </td>
-                                                    <td>
-                                                        <p class="text-muted mb-0"><i data-feather="users"
-                                                                class="me-2 icon-sm"></i>105.02k</p>
-                                                    </td>
-                                                    <td class="text-end">
-                                                        <p class="text-danger fw-medium fs-12 mb-0"><i
-                                                                class="ri-arrow-down-s-fill fs-5 align-middle"></i>10.52%
-                                                        </p>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td>
-                                                        <h4 class="text-truncate fs-14 fs-medium mb-0"><i
-                                                                class="ri-stop-fill align-middle fs-18 text-info me-2"></i>Tablet
-                                                            Users</h4>
-                                                    </td>
-                                                    <td>
-                                                        <p class="text-muted mb-0"><i data-feather="users"
-                                                                class="me-2 icon-sm"></i>42.89k</p>
-                                                    </td>
-                                                    <td class="text-end">
-                                                        <p class="text-danger fw-medium fs-12 mb-0"><i
-                                                                class="ri-arrow-down-s-fill fs-5 align-middle"></i>7.36%
-                                                        </p>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div><!-- end card body -->
-                            </div><!-- end card -->
-                        </div><!-- end col -->
-                    </div><!-- end row -->
-
-                    <div class="row">
-                        <div class="col-xl-12">
-                            <div class="card">
-                                <div class="card-header align-items-center d-flex">
-                                    <h4 class="card-    title mb-0 flex-grow-1">Recent Users</h4>
-                                    <div class="flex-shrink-0 d-flex align-items-center">
-                                        <!-- Filter Form -->
-                                        <form method="GET" action="">
-                                            <label for="statusFilter" class="me-2">Filter by Status:</label>
-                                            <select name="statusFilter" id="statusFilter"
-                                                class="form-select form-select-sm w-auto d-inline-block me-3">
-                                                <option value=""
-                                                    <?= (isset($_GET['statusFilter']) && $_GET['statusFilter'] == '') ? 'selected' : ''; ?>>
-                                                    All</option>
-                                                <option value="Authorized"
-                                                    <?= (isset($_GET['statusFilter']) && $_GET['statusFilter'] == 'Authorized') ? 'selected' : ''; ?>>
-                                                    Authorized
-                                                </option>
-                                                <option value="Unauthorized"
-                                                    <?= (isset($_GET['statusFilter']) && $_GET['statusFilter'] == 'Unauthorized') ? 'selected' : ''; ?>>
-                                                    Unauthorized
-                                                </option>
-                                                <<option value="India" 
-                                                <?= (isset($_GET['statusFilter']) && $_GET['statusFilter'] == 'India') ? 'selected' : ''; ?>>
-                                                India
-                                            </option>
-                                            </select>
-
-                                            <button type="submit" class="btn btn-primary btn-sm">Apply Filter</button>
-                                        </form>
-
-                                        <!-- PDF Generation Form -->
-                                        <form method="post" action="generate_report.php" class="ms-3">
-                                            <input type="hidden" name="statusFilter"
-                                                value="<?= isset($_GET['statusFilter']) ? $_GET['statusFilter'] : '' ?>">
-                                            <button type="submit" class="btn btn-soft-info btn-sm">
-                                                <i class="ri-file-list-3-line align-middle"></i> Generate PDF Report
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-
-                                <div class="card-body">
-                                    <div class="table-responsive table-card">
-                                        <table
-                                            class="table table-borderless table-centered align-middle table-nowrap mb-0">
-                                            <thead class="text-muted table-light">
-                                                <tr>
-                                                    <th scope="col">ID</th>
-                                                    <th scope="col">Name</th>
-                                                    <th scope="col">Mail</th>
-                                                    <th scope="col">IP</th>
-                                                    <th scope="col">Location</th>
-                                                    <th scope="col">Status</th>
-                                                    <th scope="col">Registration Date</th>
-                                                    <th scope="col"></th>
-                                                    <th scope="col">Version</th>
-                                                    
-                                                </tr>
-                                            </thead>
-                                            <tbody id="userTableBody">
-                                                <?php
-                                                if ($jsonData === false) {
-                                                    echo "<tr><td colspan='8' class='text-center'>Unable to fetch data from API.</td></tr>";
-                                                } else {
-                                                    $data = json_decode($jsonData, true);
-                                                    $statusFilter = isset($_GET['statusFilter']) ? $_GET['statusFilter'] : '';
-                                                    $countryFilter = isset($_GET['countryFilter']) ? $_GET['countryFilter'] : '';
-
-                                                     $filteredUsers = array_filter($data, function ($user) use ($statusFilter, $countryFilter) {
-            $statusMatch = $statusFilter === '' || (isset($user['status']) && $user['status'] === $statusFilter);
-            $countryMatch = $countryFilter === '' || (isset($user['location']['country']) && $user['location']['country'] === $countryFilter);
-            return $statusMatch && $countryMatch;
-        });
-        if (!empty($filteredUsers)) {
-            $serialNumber = 1;
-            foreach ($filteredUsers as $user) {
-                displayUserRow($serialNumber++, $user);
+    var successRateOptions = {
+        responsive: false,
+        maintainAspectRatio: false,
+        scales: {
+            x: {
+                title: {
+                    display: true,
+                    text: 'Months'
+                }
+            },
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Success Rate (%)'
+                },
+                ticks: {
+                    max: 100 // Cap at 100% for success rate
+                }
             }
-        } else {
-            echo "<tr><td colspan='8' class='text-center'>No data available for the selected filter.</td></tr>";
         }
-    }
+    };
 
-                                                function displayUserRow($serialNumber, $user)
-                                                {
-                                                    $name = htmlspecialchars($user['name']);
-                                                    $email = htmlspecialchars($user['email']);
-                                                    $ip = htmlspecialchars($user['ip']);
-                                                    $country = htmlspecialchars($user['location']['country'] ?? 'N/A');
-                                                    $status = htmlspecialchars($user['status'] ?? 'Unknown');
-                                                    $signupDate = htmlspecialchars(date('Y-m-d', strtotime($user['signupDate'])));
-                                                    $statusBadge = $status === 'Authorized'
-                                                        ? "<span class='badge badge-soft-success'>$status</span>"
-                                                        : "<span class='badge badge-soft-danger'>$status</span>";
-                                                    $v = htmlspecialchars($user['__v']);
+    // Initialize API Success Rate Chart
+    var ctx1 = document.getElementById('apiSuccessRateChart').getContext('2d');
+    new Chart(ctx1, {
+        type: 'line', // Use line chart for area appearance
+        data: successRateData,
+        options: successRateOptions
+    });
 
-                                                    echo "<tr class='user-row' data-status='$status'>
-                                                    <td><a href='#' class='fw-medium link-primary'>$serialNumber</a></td>
-                                                    <td>$name</td>
-                                                    <td>$email</td>
-                                                    <td>$ip</td>
-                                                    <td>$country</td>
-                                                    <td>$statusBadge</td>
-                                                    <td>$signupDate</td>
-                                                    <td>$v</td>
-                                                </tr>";
-                                                }
-                                                ?>
-                                            </tbody>
+    // Failed API Calls Data
+    var failedApiData = {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], // Example months
+        datasets: [{
+            label: 'Failed Calls',
+            data: [10, 15, 8, 5, 12, 9], // Example failure values
+            fill: true,
+            backgroundColor: 'rgba(255, 159, 64, 0.2)', // Light orange fill
+            borderColor: 'rgba(255, 159, 64, 1)', // Orange border
+            pointBackgroundColor: 'rgba(255, 159, 64, 1)',
+            tension: 0.4 // Smooth curve
+        }]
+    };
 
-                                        </table><!-- end table -->
-                                    </div>
-                                </div>
+    var failedApiOptions = {
+        responsive: false,
+        maintainAspectRatio: false,
+        scales: {
+            x: {
+                title: {
+                    display: true,
+                    text: 'Months'
+                }
+            },
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Number of Calls'
+                }
+            }
+        }
+    };
 
-                            </div> <!-- .card-->
-                        </div> <!-- .col-->
-                    </div>
+    // Initialize Failed API Calls Chart
+    var ctx2 = document.getElementById('failedApiCallsChart').getContext('2d');
+    new Chart(ctx2, {
+        type: 'line', // Use line chart for area appearance
+        data: failedApiData,
+        options: failedApiOptions
+    });
 
-                    <!-- container-fluid -->
+    // Export to CSV functionality for API Success Rate
+    document.getElementById("exportApiSuccessRate").addEventListener("click", function () {
+        const data = [["Month", "Success Rate (%)"]];
+        successRateData.labels.forEach((label, index) => {
+            data.push([label, successRateData.datasets[0].data[index]]);
+        });
+        
+        let csvContent = "data:text/csv;charset=utf-8," + 
+            data.map(row => row.join(",")).join("\n");
+
+        const link = document.createElement("a");
+        link.setAttribute("href", encodeURI(csvContent));
+        link.setAttribute("download", "api_success_rate.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+
+    // Export to CSV functionality for Failed API Calls
+    document.getElementById("exportFailedApiCalls").addEventListener("click", function () {
+        const data = [["Month", "Failed Calls"]];
+        failedApiData.labels.forEach((label, index) => {
+            data.push([label, failedApiData.datasets[0].data[index]]);
+        });
+        
+        let csvContent = "data:text/csv;charset=utf-8," + 
+            data.map(row => row.join(",")).join("\n");
+
+        const link = document.createElement("a");
+        link.setAttribute("href", encodeURI(csvContent));
+        link.setAttribute("download", "failed_api_calls.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+</script>
+
+
+
+
+
+<div class="row">
+    <!-- First Card -->
+    <div class="col-xl-6">
+        <div class="card card-height-100">
+            <div class="card-header align-items-center d-flex">
+                <h4 class="card-title mb-0 flex-grow-1">Live Users By Country</h4>
+                <div class="flex-shrink-0">
+                    <button type="button" class="btn btn-soft-primary btn-sm">
+                        Export Report
+                    </button>
                 </div>
-                <!-- End Page-content -->
+            </div><!-- end card header -->
+            <div class="card-body">
+                <div id="users-by-country" data-colors='["--vz-light"]' class="text-center" style="height: 252px"></div>
+                <div class="table-responsive table-card mt-3">
+                    <table class="table table-borderless table-sm table-centered align-middle table-nowrap mb-1">
+                        <thead class="text-muted border-dashed border border-start-0 border-end-0 bg-soft-light">
+                            <tr>
+                                <th>Duration (Secs)</th>
+                                <th style="width: 30%;">Sessions</th>
+                                <th style="width: 30%;">Views</th>
+                            </tr>
+                        </thead>
+                        <tbody class="border-0">
+                            <tr>
+                                <td>0-30</td>
+                                <td>2,250</td>
+                                <td>4,250</td>
+                            </tr>
+                            <tr>
+                                <td>31-60</td>
+                                <td>1,501</td>
+                                <td>2,050</td>
+                            </tr>
+                            <tr>
+                                <td>61-120</td>
+                                <td>750</td>
+                                <td>1,600</td>
+                            </tr>
+                            <tr>
+                                <td>121-240</td>
+                                <td>540</td>
+                                <td>1,040</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div><!-- end card body -->
+        </div><!-- end card -->
+    </div><!-- end col -->
+
+    <!-- Second Card -->
+    <div class="col-xl-6">
+    <div class="card card-height-100">
+        <div class="card-header align-items-center d-flex">
+            <h4 class="card-title mb-0 flex-grow-1">Users From States</h4>
+            <div>
+                <button type="button" class="btn btn-soft-secondary btn-sm">ALL</button>
+                <button type="button" class="btn btn-soft-primary btn-sm">1M</button>
+                <button type="button" class="btn btn-soft-secondary btn-sm">6M</button>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div>
+                <div id="countries_charts" class="apex-charts" dir="ltr"></div>
+            </div>
+        </div>
+    </div>
+</div><!-- end col -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+var options = {
+    chart: {
+        type: 'bar', // Bar chart
+        height: 350
+    },
+    series: [{
+        name: 'Sessions',
+        data: [3000, 4000, 2500, 3500, 2900, 3300] // Example session data
+    }],
+    xaxis: {
+        categories: ['Maharashtra', 'Andhra Pradesh', 'Kerala', 'Goa', 'Jammu and Kashmir', 'Bihar'], // State names
+        title: {
+            text: 'States',
+            style: {
+                fontSize: '14px',
+                fontWeight: 'bold',
+            }
+        }
+    },
+    yaxis: {
+        title: {
+            text: 'Sessions',
+            style: {
+                fontSize: '14px',
+                fontWeight: 'bold',
+            }
+        }
+    },
+    colors: ['#00A878'], // Magenta color for all bars
+    grid: {
+        borderColor: '#f1f1f1' // Light grid lines
+    },
+    tooltip: {
+        y: {
+            formatter: function (val) {
+                return val + " sessions";
+            }
+        }
+    },
+    plotOptions: {
+        bar: {
+            borderRadius: 4, // Rounded corners
+            horizontal: false, // Vertical bars
+        }
+    },
+};
+
+var chart = new ApexCharts(document.querySelector("#countries_charts"), options);
+chart.render();
+</script>
+
+
+    <!-- Third Card -->
+    <div class="col-xl-6">
+        <div class="card card-height-100">
+            <div class="card-header align-items-center d-flex">
+                <h4 class="card-title mb-0 flex-grow-1">Users by Device</h4>
+                <div class="flex-shrink-0">
+                    <div class="dropdown card-header-dropdown">
+                        <a class="text-reset dropdown-btn" href="#" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span class="text-muted fs-16"><i class="mdi mdi-dots-vertical align-middle"></i></span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end">
+                            <a class="dropdown-item" href="#">Today</a>
+                            <a class="dropdown-item" href="#">Last Week</a>
+                            <a class="dropdown-item" href="#">Last Month</a>
+                            <a class="dropdown-item" href="#">Current Year</a>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- end card header -->
+            <div class="card-body">
+                <div id="user_device_pie_charts" data-colors='["--vz-warning", "--vz-info"]' class="apex-charts" dir="ltr"></div>
+                <div class="table-responsive mt-3">
+                    <table class="table table-borderless table-sm table-centered align-middle table-nowrap mb-0">
+                        <tbody class="border-0">
+                        <tr>
+                                <td>
+                                    <h4 class="text-truncate fs-14 fs-medium mb-0"><i class="ri-stop-fill align-middle fs-18 text-warning me-2"></i>Web Users</h4>
+                                </td>
+                                <td>
+                                    <p class="text-muted mb-0"><i data-feather="users" class="me-2 icon-sm"></i>76.02k</p>
+                                </td>
+                                <td class="text-end">
+                                    <p class="text-danger fw-medium fs-12 mb-0"><i class="ri-arrow-down-s-fill fs-5 align-middle"></i>10.52%</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <h4 class="text-truncate fs-14 fs-medium mb-0"><i class="ri-stop-fill align-middle fs-18 text-warning me-2"></i>Mobile Users</h4>
+                                </td>
+                                <td>
+                                    <p class="text-muted mb-0"><i data-feather="users" class="me-2 icon-sm"></i>105.02k</p>
+                                </td>
+                                <td class="text-end">
+                                    <p class="text-danger fw-medium fs-12 mb-0"><i class="ri-arrow-down-s-fill fs-5 align-middle"></i>10.52%</p>
+                                </td>
+                           
+                        </tbody>
+                    </table>
+                </div>
+            </div><!-- end card body -->
+        </div><!-- end card -->
+    </div><!-- end col -->
+</div><!-- end row -->
+
+                   
 
                 <footer class="footer">
                     <div class="container-fluid">
@@ -1838,6 +2272,9 @@ $bounceRate = ($totalSessionTime/$totalSessionTime/20) *100;
 
         <!-- App js -->
         <script src="assets/js/app.js"></script>
+                <!-- DAU and MAU -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </body>
 
 
