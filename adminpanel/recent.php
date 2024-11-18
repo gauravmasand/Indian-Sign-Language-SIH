@@ -43,127 +43,116 @@ $bounceRate = ($totalSessionTime/$totalSessionTime/20) *100;
     <link href="assets/css/custom.min.css" rel="stylesheet" type="text/css" />
 </head>
     <body>
-        <div class="row">
-                <div class="col-xl-12">
-                    <div class="card">
-                                        <div class="card-header align-items-center d-flex">
-                                            <h4 class="card-    title mb-0 flex-grow-1">Recent Users</h4>
-                                            <div class="flex-shrink-0 d-flex align-items-center">
-                                                <!-- Filter Form -->
-                                                <form method="GET" action="">
-                                                    <label for="statusFilter" class="me-2">Filter by Status:</label>
-                                                    <select name="statusFilter" id="statusFilter"
-                                                        class="form-select form-select-sm w-auto d-inline-block me-3">
-                                                        <option value=""
-                                                            <?= (isset($_GET['statusFilter']) && $_GET['statusFilter'] == '') ? 'selected' : ''; ?>>
-                                                            All</option>
-                                                        <option value="Authorized"
-                                                            <?= (isset($_GET['statusFilter']) && $_GET['statusFilter'] == 'Authorized') ? 'selected' : ''; ?>>
-                                                            Authorized
-                                                        </option>
-                                                        <option value="Unauthorized"
-                                                            <?= (isset($_GET['statusFilter']) && $_GET['statusFilter'] == 'Unauthorized') ? 'selected' : ''; ?>>
-                                                            Unauthorized
-                                                        </option>
-                                                        <<option value="India" 
-                                                        <?= (isset($_GET['statusFilter']) && $_GET['statusFilter'] == 'India') ? 'selected' : ''; ?>>
-                                                        India
-                                                    </option>
-                                                    </select>
+    <div class="text-end mb-3">
+        <form action="generate_report.php" method="post">
+            <button type="submit" class="btn btn-primary">Generate PDF Report</button>
+        </form>
+    </div>
 
-                                                    <button type="submit" class="btn btn-primary btn-sm">Apply Filter</button>
-                                                </form>
+    <?php
+// Decode JSON data
+$data = json_decode($jsonData, true);
 
-                                                <!-- PDF Generation Form -->
-                                                <form method="post" action="generate_report.php" class="ms-3">
-                                                    <input type="hidden" name="statusFilter"
-                                                        value="<?= isset($_GET['statusFilter']) ? $_GET['statusFilter'] : '' ?>">
-                                                    <button type="submit" class="btn btn-soft-info btn-sm">
-                                                        <i class="ri-file-list-3-line align-middle"></i> Generate PDF Report
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </div>
+// Set number of records per page
+$recordsPerPage = 30;
 
-                                        <div class="card-body">
-                                            <div class="table-responsive table-card">
-                                                <table
-                                                    class="table table-borderless table-centered align-middle table-nowrap mb-0">
-                                                    <thead class="text-muted table-light">
-                                                        <tr>
-                                                            <th scope="col">ID</th>
-                                                            <th scope="col">Name</th>
-                                                            <th scope="col">Mail</th>
-                                                            <th scope="col">IP</th>
-                                                            <th scope="col">Location</th>
-                                                            <th scope="col">Status</th>
-                                                            <th scope="col">Registration Date</th>
-                                                            <th scope="col"></th>
-                                                            <th scope="col">Version</th>
-                                                            
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody id="userTableBody">
-                                                        <?php
-                                                        if ($jsonData === false) {
-                                                            echo "<tr><td colspan='8' class='text-center'>Unable to fetch data from API.</td></tr>";
-                                                        } else {
-                                                            $data = json_decode($jsonData, true);
-                                                            $statusFilter = isset($_GET['statusFilter']) ? $_GET['statusFilter'] : '';
-                                                            $countryFilter = isset($_GET['countryFilter']) ? $_GET['countryFilter'] : '';
+// Get the current page number from the URL, default to 1
+$currentPage = isset($_GET['page']) ? intval($_GET['page']) : 1;
 
-                                                            $filteredUsers = array_filter($data, function ($user) use ($statusFilter, $countryFilter) {
-                    $statusMatch = $statusFilter === '' || (isset($user['status']) && $user['status'] === $statusFilter);
-                    $countryMatch = $countryFilter === '' || (isset($user['location']['country']) && $user['location']['country'] === $countryFilter);
-                    return $statusMatch && $countryMatch;
-                });
-                if (!empty($filteredUsers)) {
-                    $serialNumber = 1;
-                    foreach ($filteredUsers as $user) {
-                        displayUserRow($serialNumber++, $user);
-                    }
-                } else {
-                    echo "<tr><td colspan='8' class='text-center'>No data available for the selected filter.</td></tr>";
+// Calculate total pages
+$totalRecords = count($data);
+$totalPages = ceil($totalRecords / $recordsPerPage);
+
+// Calculate the starting index for the current page
+$startIndex = ($currentPage - 1) * $recordsPerPage;
+
+// Slice the data for the current page
+$pageData = array_slice($data, $startIndex, $recordsPerPage);
+
+?>
+
+<div class="table-responsive table-card">
+    <table class="table table-borderless table-centered align-middle table-nowrap mb-0">
+        <thead class="text-muted table-light">
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Name</th>
+                <th scope="col">Mail</th>
+                <th scope="col">IP</th>
+                <th scope="col">Location</th>
+                <th scope="col">Status</th>
+                <th scope="col">Registration Date</th>
+                <th scope="col">Version</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+            if (empty($pageData)) {
+                echo "<tr><td colspan='8' class='text-center'>No records found.</td></tr>";
+            } else {
+                $serialNumber = $startIndex + 1; // Record number starts from the index of the current page
+                foreach ($pageData as $user) {
+                    displayUserRow($serialNumber++, $user);
                 }
             }
+            ?>
+        </tbody>
+    </table>
+</div>
 
-                                                        function displayUserRow($serialNumber, $user)
-                                                        {
-                                                            $name = htmlspecialchars($user['name']);
-                                                            $email = htmlspecialchars($user['email']);
-                                                            $ip = htmlspecialchars($user['ip']);
-                                                            $country = htmlspecialchars($user['location']['country'] ?? 'N/A');
-                                                            $status = htmlspecialchars($user['status'] ?? 'Unknown');
-                                                            $signupDate = htmlspecialchars(date('Y-m-d', strtotime($user['signupDate'])));
-                                                            $statusBadge = $status === 'Authorized'
-                                                                ? "<span class='badge badge-soft-success'>$status</span>"
-                                                                : "<span class='badge badge-soft-danger'>$status</span>";
-                                                            $v = htmlspecialchars($user['__v']);
+<!-- Pagination Links -->
+<nav>
+    <ul class="pagination justify-content-center mt-4">
+        <?php if ($currentPage > 1): ?>
+            <li class="page-item">
+                <a class="page-link" href="?page=<?= $currentPage - 1; ?>" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+        <?php endif; ?>
 
-                                                            echo "<tr class='user-row' data-status='$status'>
-                                                            <td><a href='#' class='fw-medium link-primary'>$serialNumber</a></td>
-                                                            <td>$name</td>
-                                                            <td>$email</td>
-                                                            <td>$ip</td>
-                                                            <td>$country</td>
-                                                            <td>$statusBadge</td>
-                                                            <td>$signupDate</td>
-                                                            <td>$v</td>
-                                                        </tr>";
-                                                        }
-                                                        ?>
-                                                    </tbody>
+        <?php for ($page = 1; $page <= $totalPages; $page++): ?>
+            <li class="page-item <?= ($page == $currentPage) ? 'active' : ''; ?>">
+                <a class="page-link" href="?page=<?= $page; ?>"><?= $page; ?></a>
+            </li>
+        <?php endfor; ?>
 
-                                                </table><!-- end table -->
-                                            </div>
-                                        </div>
+        <?php if ($currentPage < $totalPages): ?>
+            <li class="page-item">
+                <a class="page-link" href="?page=<?= $currentPage + 1; ?>" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        <?php endif; ?>
+    </ul>
+</nav>
 
-                                    </div> <!-- .card-->
-                                </div> <!-- .col-->
-                            </div>
+<?php
+function displayUserRow($serialNumber, $user)
+{
+    $name = htmlspecialchars($user['name']);
+    $email = htmlspecialchars($user['email']);
+    $ip = htmlspecialchars($user['ip']);
+    $country = htmlspecialchars($user['location']['country'] ?? 'N/A');
+    $status = htmlspecialchars($user['status'] ?? 'Unknown');
+    $signupDate = htmlspecialchars(date('Y-m-d', strtotime($user['signupDate'])));
+    $statusBadge = $status === 'Authorized'
+        ? "<span class='badge badge-soft-success'>$status</span>"
+        : "<span class='badge badge-soft-danger'>$status</span>";
+    $v = htmlspecialchars($user['__v']);
 
-                            <!-- container-fluid -->
-                        </div>
-                        <!-- End Page-content -->
+    echo "<tr class='user-row' data-status='$status'>
+        <td><a href='#' class='fw-medium link-primary'>$serialNumber</a></td>
+        <td>$name</td>
+        <td>$email</td>
+        <td>$ip</td>
+        <td>$country</td>
+        <td>$statusBadge</td>
+        <td>$signupDate</td>
+        <td>$v</td>
+    </tr>";
+}
+?>
+
         </body>
     </html>
