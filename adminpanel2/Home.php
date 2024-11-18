@@ -28,7 +28,6 @@ $bounceRate = ($totalSessionTime/$totalSessionTime/20) *100;
 <!-- Mirrored from themesbrand.com/velzon/html/default/dashboard-analytics.html by HTTrack Website Copier/3.x [XR&CO'2014], Fri, 01 Jul 2022 06:35:06 GMT -->
 
 <head>
-    <h1>Hello</h1>
     <meta charset="utf-8" />
     <title>Analytics | Velzon - Admin & Dashboard Template  </title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -50,14 +49,11 @@ $bounceRate = ($totalSessionTime/$totalSessionTime/20) *100;
     <link href="assets/css/app.min.css" rel="stylesheet" type="text/css" />
     <!-- custom Css-->
     <link href="assets/css/custom.min.css" rel="stylesheet" type="text/css" />
-
 </head>
 
 <body>
-
     <!-- Begin page -->
     <div id="layout-wrapper">
-
         <header id="page-topbar">
             <div class="layout-width">
                 <div class="navbar-header">
@@ -211,9 +207,6 @@ $bounceRate = ($totalSessionTime/$totalSessionTime/20) *100;
                             </div>
                         </div>
 
-
-
-
                         <div class="dropdown ms-sm-3 header-item topbar-user">
                             <button type="button" class="btn" id="page-header-user-dropdown" data-bs-toggle="dropdown"
                                 aria-haspopup="true" aria-expanded="false">
@@ -364,8 +357,8 @@ $bounceRate = ($totalSessionTime/$totalSessionTime/20) *100;
    
 
 <!-- Users Card -->
-<div class="col-md-10">
-    <div class="card card-animate" style="height: 280px; background-color: #F7F6C5;">
+<div class="col-md-6">
+    <div class="card card-animate" style="height: 280px; background-color: #d1e7ff;">
         <div class="card-body">
             <div class="d-flex justify-content-between">
                 <div>
@@ -460,7 +453,7 @@ $bounceRate = ($totalSessionTime/$totalSessionTime/20) *100;
 
 <!-- //<div class="row"> -->
    <!-- Container for both charts side by side -->
-   <!-- //<div class="row"> -->
+   <div class="row">
     <!-- DAU, WAU, and MAU Chart -->
     <div class="col-md-11">
         <div class="card card-animate" style="width: 100%; height: 350px; position: relative;"> <!-- Set consistent card height, larger width, and make it relative -->
@@ -470,7 +463,7 @@ $bounceRate = ($totalSessionTime/$totalSessionTime/20) *100;
             </div>
         </div>
     </div>
-<!-- </div> -->
+</div>
 
 <!-- Include necessary libraries -->
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
@@ -501,7 +494,7 @@ $bounceRate = ($totalSessionTime/$totalSessionTime/20) *100;
                     backgroundColor: ['#98FF98', '#A1FCDF', '#009688'], // Sky Blue for DAU, Dark Purple for WAU, Teal for MAU
                     borderColor: ['#98FF98', '#A1FCDF', '#009688'], // Matching border color with the bars
                     borderWidth: 0,
-                    barPercentage: 1, // Control bar width to prevent shrinking
+                    barPercentage: 0.8, // Control bar width to prevent shrinking
                     categoryPercentage: 1 // Control space between bars
                 }]
             },
@@ -561,10 +554,10 @@ $bounceRate = ($totalSessionTime/$totalSessionTime/20) *100;
 
 <div class="row">
     <!-- Daily Active Users (24 hours) -->
-    <div class="col-md-6">
+    <div class="col-md-4">
         <div class="card card-animate" style="width: 100%; height: 500px; position: relative;">
             <div class="card-body" style="height: 100%;">
-                <canvas id="dailyChart" width="500" height="300"></canvas>
+                <canvas id="dailyChart" width="500" height="450"></canvas>
                 <div class="metrics" style="padding: 10px;">
                     <p><b>Total Users:</b> <span id="dailyTotalUsers">0</span></p>
                     <p><b>Active Users:</b> <span id="dailyActiveUsers">0</span></p>
@@ -579,10 +572,10 @@ $bounceRate = ($totalSessionTime/$totalSessionTime/20) *100;
     </div>
 
     <!-- Weekly Active Users (7 days) -->
-    <div class="col-md-6">
+    <div class="col-md-4">
         <div class="card card-animate" style="width: 100%; height: 500px; position: relative;">
             <div class="card-body" style="height: 100%;">
-                <canvas id="weeklyChart" width="500" height="300"></canvas>
+                <canvas id="weeklyChart" width="500" height="450"></canvas>
                 <div class="metrics" style="padding: 10px;">
                     <p><b>Total Users:</b> <span id="weeklyTotalUsers">0</span></p>
                     <p><b>Active Users:</b> <span id="weeklyActiveUsers">0</span></p>
@@ -596,10 +589,10 @@ $bounceRate = ($totalSessionTime/$totalSessionTime/20) *100;
     </div>
 
     <!-- Monthly Active Users (4 weeks) -->
-    <div class="col-md-6">
+    <div class="col-md-4">
         <div class="card card-animate" style="width: 100%; height: 500px; position: relative;">
             <div class="card-body" style="height: 100%;">
-                <canvas id="monthlyChart" width="500" height="300"></canvas>
+                <canvas id="monthlyChart" width="500" height="450"></canvas>
                 <div class="metrics" style="padding: 10px;">
                     <p><b>Total Users:</b> <span id="monthlyTotalUsers">0</span></p>
                     <p><b>Active Users:</b> <span id="monthlyActiveUsers">0</span></p>
@@ -614,210 +607,6 @@ $bounceRate = ($totalSessionTime/$totalSessionTime/20) *100;
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script> <!-- Add this line for datalabels -->
-
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        // Simulated API call to fetch data (replace with actual API call)
-        function fetchData(url) {
-            return fetch(url)
-                .then(response => response.json())
-                .catch(error => {
-                    console.log('Error fetching data:', error);
-                    return { success: [], failure: [] }; // Return empty arrays for success and failure if error occurs
-                });
-        }
-
-        // Fetch and render the Daily Active Users and API success/failure chart
-        fetchData('https://api.example.com/daily-users')
-            .then(dailyData => {
-                if (dailyData.success.length === 0) {
-                    dailyData = {
-                        success: [120, 150, 180, 220, 170, 200, 250, 180, 160, 140, 200, 240, 300, 260, 220, 200, 190, 170, 180, 220, 210, 240, 250, 300],
-                        failure: [10, 15, 20, 30, 20, 25, 30, 25, 20, 15, 25, 30, 40, 35, 30, 25, 20, 25, 30, 35, 25, 30, 35, 40] // Default data if fetch fails
-                    };
-                }
-
-                var successRate = dailyData.success.map((value, index) => (value / (value + dailyData.failure[index])) * 100);
-                var failureRate = dailyData.failure.map((value, index) => (value / (value + dailyData.success[index])) * 100);
-
-                var ctxDaily = document.getElementById('dailyChart').getContext('2d');
-                var dailyChart = new Chart(ctxDaily, {
-                    type: 'bar',
-                    data: {
-                        labels: Array.from({ length: 24 }, (_, i) => `${i}:00`), // Hourly labels
-                        datasets: [{
-                            label: 'DAU Success Rate (%)',
-                            data: successRate, // Success rate
-                            backgroundColor: '#880D1E',
-                            borderColor: '#880D1E',
-                            borderWidth: 1,
-                            datalabels: {
-                                align: 'top',
-                                color: 'white',
-                                font: { weight: 'bold' },
-                                formatter: function(value) {
-                                    return value.toFixed(2) + '%'; // Show percentage with 2 decimal places
-                                }
-                            }
-                        }, {
-                            label: 'DAU Failure Rate (%)',
-                            data: failureRate, // Failure rate
-                            backgroundColor: '#DD2D4A',
-                            borderColor: '#DD2D4A',
-                            borderWidth: 1,
-                            datalabels: {
-                                align: 'bottom',
-                                color: 'white',
-                                font: { weight: 'bold' },
-                                formatter: function(value) {
-                                    return value.toFixed(2) + '%'; // Show percentage with 2 decimal places
-                                }
-                            }
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            x: { title: { display: true, text: 'Time (Hours)' } },
-                            y: { beginAtZero: true, title: { display: true, text: 'Percentage' }, max: 100 }
-                        },
-                        plugins: {
-                            datalabels: {
-                                display: true, // Enable labels to be shown
-                            }
-                        }
-                    }
-                });
-            });
-
-        // Fetch and render the Weekly Active Users and API success/failure chart
-        fetchData('https://api.example.com/weekly-users')
-            .then(weeklyData => {
-                if (weeklyData.success.length === 0) {
-                    weeklyData = {
-                        success: [1500, 1600, 1400, 1700, 1800, 1900, 2000],
-                        failure: [50, 60, 40, 70, 80, 90, 100] // Default data if fetch fails
-                    };
-                }
-
-                var successRate = weeklyData.success.map((value, index) => (value / (value + weeklyData.failure[index])) * 100);
-                var failureRate = weeklyData.failure.map((value, index) => (value / (value + weeklyData.success[index])) * 100);
-
-                var ctxWeekly = document.getElementById('weeklyChart').getContext('2d');
-                var weeklyChart = new Chart(ctxWeekly, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-                        datasets: [{
-                            label: 'WAU Success Rate (%)',
-                            data: successRate, // Success rate
-                            backgroundColor: '#457B9D',
-                            borderColor: '#457B9D',
-                            borderWidth: 1,
-                            datalabels: {
-                                align: 'top',
-                                color: 'white',
-                                font: { weight: 'bold' },
-                                formatter: function(value) {
-                                    return value.toFixed(2) + '%'; // Show percentage with 2 decimal places
-                                }
-                            }
-                        }, {
-                            label: 'WAU Failure Rate (%)',
-                            data: failureRate, // Failure rate
-                            backgroundColor: '#1D3557',
-                            borderColor: '#1D3557',
-                            borderWidth: 1,
-                            datalabels: {
-                                align: 'bottom',
-                                color: 'white',
-                                font: { weight: 'bold' },
-                                formatter: function(value) {
-                                    return value.toFixed(2) + '%'; // Show percentage with 2 decimal places
-                                }
-                            }
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            x: { title: { display: true, text: 'Day' } },
-                            y: { beginAtZero: true, title: { display: true, text: 'Percentage' }, max: 100 }
-                        },
-                        plugins: {
-                            datalabels: {
-                                display: true, // Enable labels to be shown
-                            }
-                        }
-                    }
-                });
-            });
-
-        // Fetch and render the Monthly Active Users and API success/failure chart
-        fetchData('https://api.example.com/monthly-users')
-            .then(monthlyData => {
-                if (monthlyData.success.length === 0) {
-                    monthlyData = {
-                        success: [22000, 23000, 25000, 28000],
-                        failure: [500, 600, 400, 700] // Default data if fetch fails
-                    };
-                }
-
-                var successRate = monthlyData.success.map((value, index) => (value / (value + monthlyData.failure[index])) * 100);
-                var failureRate = monthlyData.failure.map((value, index) => (value / (value + monthlyData.success[index])) * 100);
-
-                var ctxMonthly = document.getElementById('monthlyChart').getContext('2d');
-                var monthlyChart = new Chart(ctxMonthly, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-                        datasets: [{
-                            label: 'MAU Success Rate (%)',
-                            data: successRate, // Success rate
-                            backgroundColor: '#673AB7',
-                            borderColor: '#673AB7',
-                            borderWidth: 1,
-                            datalabels: {
-                                align: 'top',
-                                color: 'white',
-                                font: { weight: 'bold' },
-                                formatter: function(value) {
-                                    return value.toFixed(2) + '%'; // Show percentage with 2 decimal places
-                                }
-                            }
-                        }, {
-                            label: 'MAU Failure Rate (%)',
-                            data: failureRate, // Failure rate
-                            backgroundColor: '#8D6E63',
-                            borderColor: '#8D6E63',
-                            borderWidth: 1,
-                            datalabels: {
-                                align: 'bottom',
-                                color: 'white',
-                                font: { weight: 'bold' },
-                                formatter: function(value) {
-                                    return value.toFixed(2) + '%'; // Show percentage with 2 decimal places
-                                }
-                            }
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            x: { title: { display: true, text: 'Weeks' } },
-                            y: { beginAtZero: true, title: { display: true, text: 'Percentage' }, max: 100 }
-                        },
-                        plugins: {
-                            datalabels: {
-                                display: true, // Enable labels to be shown
-                            }
-                        }
-                    }
-                });
-            });
-    });
-</script>
-
 
 
 <!-- Include necessary libraries -->
@@ -884,7 +673,7 @@ $bounceRate = ($totalSessionTime/$totalSessionTime/20) *100;
                             backgroundColor: '#457B9D', // New color (Green)
                             borderColor: '#388E3C',
                             borderWidth: 1,
-                            barPercentage: 0.5,
+                            barPercentage: 0.9,
                             categoryPercentage: 0.6
                         }]
                     },
@@ -988,11 +777,6 @@ $bounceRate = ($totalSessionTime/$totalSessionTime/20) *100;
                     <div>
                         <p class="fw-medium text-muted mb-0">Peak Traffic Time</p>
                     </div>
-                    <div class="avatar-sm flex-shrink-0">
-                        <span class="avatar-title bg-soft-primary rounded-circle fs-2">
-                        <i data-feather="clock" class="text-warning"></i>
-                        </span>
-                    </div>
                 </div>
                 <!-- Bar Chart for Peak Traffic Time -->
                 <div id="peakTrafficChart" style="height: 250px;"></div>
@@ -1009,11 +793,6 @@ $bounceRate = ($totalSessionTime/$totalSessionTime/20) *100;
                     <div>
                         <p class="fw-medium text-muted mb-0">Avg. Daily Time Spent</p>
                     </div>
-                    <div class="avatar-sm flex-shrink-0">
-                        <span class="avatar-title bg-soft-warning rounded-circle fs-2">
-                            <i data-feather="clock" class="text-warning"></i>
-                        </span>
-                    </div>
                 </div>
                 <!-- Bar Chart for Avg. Daily Time Spent -->
                 <div id="avgDailyTimeChart" style="height: 250px;"></div>
@@ -1021,37 +800,35 @@ $bounceRate = ($totalSessionTime/$totalSessionTime/20) *100;
             </div>
         </div>
     </div>
-
-    <!-- Avg. Session Duration Card -->
+    <!-- Session Time Card with Horizontal Bar Graph -->
     <div class="col-md-4">
         <div class="card card-animate">
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <div>
-                        <p class="fw-medium text-muted mb-0">Avg. Session Duration</p>
-                    </div>
-                    <div class="avatar-sm flex-shrink-0">
-                        <span class="avatar-title bg-soft-danger rounded-circle fs-2">
-                            <i data-feather="clock" class="text-warning"></i>
-                        </span>
+                        <p class="fw-medium text-muted mb-0">Session Time Overview</p>
                     </div>
                 </div>
-                <!-- Bar Chart for Avg. Session Duration -->
-                <div id="avgSessionChart" style="height: 250px;"></div>
-                <button id="exportAvgSession" class="btn btn-primary mt-3">Export CSV</button>
+
+                <!-- Horizontal Bar Chart for Session Time, Total Session Time, and Avg Session Time -->
+                <div id="sessionTimeChart" width = "300" height="250"></div>
+
+                <button id="exportSessionTime" class="btn btn-primary mt-3">Export CSV</button>
             </div>
         </div>
     </div>
-</div>
 
+</div>
+<!-- ApexCharts Library -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        // Ensure PHP variables are set; default values if undefined
-        var peakTrafficTime = <?= isset($peakTrafficTime) ? $peakTrafficTime : 12 ?>;
-        var avgDailyTime = <?= isset($avgDailyTime) ? $avgDailyTime : 30 ?>;
-        var avgSessionDuration = <?= isset($avgSessionDuration) ? $avgSessionDuration : 20 ?>;
+        // Replace with dynamic PHP values if needed
+        var peakTrafficTime = 12;
+        var avgDailyTime = 30;
+        var avgSessionDuration = 20;
 
-        // Bar Chart Configuration
+        // Render Peak Traffic Time chart
         var peakTrafficOptions = {
             chart: { type: 'bar', height: 250 },
             series: [{ name: 'Peak Traffic Time', data: [peakTrafficTime] }],
@@ -1059,6 +836,10 @@ $bounceRate = ($totalSessionTime/$totalSessionTime/20) *100;
             yaxis: { title: { text: 'Time (minutes)' } },
             colors: ['#FF6F61'],
         };
+        var peakTrafficChart = new ApexCharts(document.querySelector("#peakTrafficChart"), peakTrafficOptions);
+        peakTrafficChart.render();
+
+        // Render Avg Daily Time Spent chart
         var avgDailyTimeOptions = {
             chart: { type: 'bar', height: 250 },
             series: [{ name: 'Avg. Daily Time Spent', data: [avgDailyTime] }],
@@ -1066,41 +847,39 @@ $bounceRate = ($totalSessionTime/$totalSessionTime/20) *100;
             yaxis: { title: { text: 'Time (minutes)' } },
             colors: ['#6A5ACD'],
         };
-        var avgSessionOptions = {
-            chart: { type: 'bar', height: 250 },
-            series: [{ name: 'Avg. Session Duration', data: [avgSessionDuration] }],
-            xaxis: { categories: ['Metrics'] },
-            yaxis: { title: { text: 'Time (minutes)' } },
-            colors: ['#98FF98'],
-        };
-
-        // Render the charts
-        var peakTrafficChart = new ApexCharts(document.querySelector("#peakTrafficChart"), peakTrafficOptions);
-        peakTrafficChart.render();
         var avgDailyTimeChart = new ApexCharts(document.querySelector("#avgDailyTimeChart"), avgDailyTimeOptions);
         avgDailyTimeChart.render();
-        var avgSessionChart = new ApexCharts(document.querySelector("#avgSessionChart"), avgSessionOptions);
-        avgSessionChart.render();
 
-        // Export CSV Function
+        // Render Session Time Overview chart
+        var sessionTimeOptions = {
+            chart: { type: 'bar', height: 250 },
+            series: [
+                { name: 'Session Time', data: [30] },
+                { name: 'Total Session Time', data: [120] },
+                { name: 'Avg Session Time', data: [45] }
+            ],
+            xaxis: { categories: ['Session 1', 'Session 2', 'Session 3'] },
+            yaxis: { title: { text: 'Sessions' } },
+            colors: ['#DC143C','#00FF00','#000080'],
+        };
+        var sessionTimeChart = new ApexCharts(document.querySelector("#sessionTimeChart"), sessionTimeOptions);
+        sessionTimeChart.render();
+
+        // CSV Export Function
         function exportCSV(chart, chartName) {
             const series = chart.w.globals.series[0];
             const labels = chart.w.globals.labels;
             let csvContent = "data:text/csv;charset=utf-8,Label,Value\n";
 
-            // Append data to CSV
             labels.forEach((label, index) => {
                 csvContent += `${label},${series[index]}\n`;
             });
 
-            // Create a downloadable link
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
             link.setAttribute("download", chartName + ".csv");
             document.body.appendChild(link);
-
-            // Trigger download
             link.click();
             document.body.removeChild(link);
         }
@@ -1112,33 +891,79 @@ $bounceRate = ($totalSessionTime/$totalSessionTime/20) *100;
         document.getElementById("exportAvgDailyTime").addEventListener("click", function () {
             exportCSV(avgDailyTimeChart, "AvgDailyTimeSpent");
         });
-        document.getElementById("exportAvgSession").addEventListener("click", function () {
-            exportCSV(avgSessionChart, "AvgSessionDuration");
+        document.getElementById("exportSessionTime").addEventListener("click", function () {
+            exportCSV(sessionTimeChart, "SessionTimeOverview");
         });
     });
 </script>
 
 
 
-<div class="row">
-    <!-- API Success Rate -->
-    <div class="col-md-6">
-        <div class="card card-animate" style="height: 350px;"> <!-- Adjust card height -->
-            <div class="card-body">
-                <h5 class="fw-medium text-muted mb-3">API Success Rate</h5>
-                <canvas id="apiSuccessRateChart" style="width: 100%; height: 200px;"></canvas>
-                <button id="exportApiSuccessRate" class="btn btn-primary mt-3">Export CSV</button>
+<div class="container">
+    <!-- API Success Rate Section -->
+    <div class="row mb-4">
+        <!-- Daily Success Rate -->
+        <div class="col-md-4">
+            <div class="card" style="min-height: 400px;">
+                <div class="card-body">
+                    <h5 class="fw-medium text-dark mb-3">Daily API Success Rate</h5>
+                    <canvas id="dailySuccessRateChart" width="500" height="500"></canvas>
+                    <button id="exportDailySuccessRate" class="btn btn-dark mt-3">Export CSV</button>
+                </div>
+            </div>
+        </div>
+        <!-- Weekly Success Rate -->
+        <div class="col-md-4">
+            <div class="card" style="min-height: 400px;">
+                <div class="card-body">
+                    <h5 class="fw-medium text-dark mb-3">Weekly API Success Rate</h5>
+                    <canvas id="weeklySuccessRateChart" width ="500" height="500"></canvas>
+                    <button id="exportWeeklySuccessRate" class="btn btn-dark mt-3">Export CSV</button>
+                </div>
+            </div>
+        </div>
+        <!-- Monthly Success Rate -->
+        <div class="col-md-4">
+            <div class="card" style="min-height: 400px;">
+                <div class="card-body">
+                    <h5 class="fw-medium text-dark mb-3">Monthly API Success Rate</h5>
+                    <canvas id="monthlySuccessRateChart"width ="500" height="500"></canvas>
+                    <button id="exportMonthlySuccessRate" class="btn btn-dark mt-3">Export CSV</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Failed API Calls -->
-    <div class="col-md-6">
-        <div class="card card-animate" style="height: 350px;"> <!-- Adjust card height -->
-            <div class="card-body">
-                <h5 class="fw-medium text-muted mb-3">Failed API Calls</h5>
-                <canvas id="failedApiCallsChart" style="width: 100%; height: 200px;"></canvas>
-                <button id="exportFailedApiCalls" class="btn btn-primary mt-3">Export CSV</button>
+    <!-- API Failure Rate Section -->
+    <div class="row">
+        <!-- Daily Failure Rate -->
+        <div class="col-md-4">
+            <div class="card" style="min-height: 400px;">
+                <div class="card-body">
+                    <h5 class="fw-medium text-dark mb-3">Daily API Failure Rate</h5>
+                    <canvas id="dailyFailureRateChart"width ="500" height="500"></canvas>
+                    <button id="exportDailyFailureRate" class="btn btn-dark mt-3">Export CSV</button>
+                </div>
+            </div>
+        </div>
+        <!-- Weekly Failure Rate -->
+        <div class="col-md-4">
+            <div class="card" style="min-height: 400px;">
+                <div class="card-body">
+                    <h5 class="fw-medium text-dark mb-3">Weekly API Failure Rate</h5>
+                    <canvas id="weeklyFailureRateChart"width ="500" height="500"></canvas>
+                    <button id="exportWeeklyFailureRate" class="btn btn-dark mt-3">Export CSV</button>
+                </div>
+            </div>
+        </div>
+        <!-- Monthly Failure Rate -->
+        <div class="col-md-4">
+            <div class="card" style="min-height: 400px;">
+                <div class="card-body">
+                    <h5 class="fw-medium text-dark mb-3">Monthly API Failure Rate</h5>
+                    <canvas id="monthlyFailureRateChart" width ="500" height="500"></canvas>
+                    <button id="exportMonthlyFailureRate" class="btn btn-dark mt-3">Export CSV</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1146,127 +971,170 @@ $bounceRate = ($totalSessionTime/$totalSessionTime/20) *100;
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // API Success Rate Data
+    // Success Rate Data for Daily, Weekly, and Monthly
     var successRateData = {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], // Example months
-        datasets: [{
-            label: 'Success Rate (%)',
-            data: [85, 88, 92, 95, 90, 93], // Example success rate values
-            fill: true,
-            backgroundColor: 'rgba(54, 162, 235, 0.2)', // Light blue fill
-            borderColor: 'rgba(54, 162, 235, 1)', // Blue border
-            pointBackgroundColor: 'rgba(54, 162, 235, 1)',
-            tension: 0.4 // Smooth curve
-        }]
+        daily: {
+            labels: ['00:00', '03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00'],
+            datasets: [{
+                label: 'Success Rate (%)',
+                data: [85, 88, 92, 95, 90, 93, 91, 94],
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        weekly: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{
+                label: 'Success Rate (%)',
+                data: [85, 88, 92, 95, 90, 93, 91],
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        monthly: {
+            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+            datasets: [{
+                label: 'Success Rate (%)',
+                data: [85, 88, 92, 90],
+                backgroundColor: 'rgba(153, 102, 255, 0.6)',
+                borderColor: 'rgba(153, 102, 255, 1)',
+                borderWidth: 1
+            }]
+        }
     };
 
-    var successRateOptions = {
-        responsive: false,
-        maintainAspectRatio: false,
+    // Failure Rate Data for Daily, Weekly, and Monthly
+    var failureRateData = {
+        daily: {
+            labels: ['00:00', '03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00'],
+            datasets: [{
+                label: 'Failure Rate (%)',
+                data: [15, 12, 8, 5, 10, 7, 9, 6],
+                backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }]
+        },
+        weekly: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{
+                label: 'Failure Rate (%)',
+                data: [15, 12, 8, 5, 10, 7, 9],
+                backgroundColor: 'rgba(255, 159, 64, 0.6)',
+                borderColor: 'rgba(255, 159, 64, 1)',
+                borderWidth: 1
+            }]
+        },
+        monthly: {
+            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+            datasets: [{
+                label: 'Failure Rate (%)',
+                data: [15, 12, 8, 10],
+                backgroundColor: '#880D1E',
+                borderColor: '#880D1E',
+                borderWidth: 1
+            }]
+        }
+    };
+
+    // Options for Bar Charts
+    var options = {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'top',
+            },
+        },
         scales: {
             x: {
                 title: {
                     display: true,
-                    text: 'Months'
+                    text: 'Time / Days / Weeks'
                 }
             },
             y: {
                 beginAtZero: true,
                 title: {
                     display: true,
-                    text: 'Success Rate (%)'
-                },
-                ticks: {
-                    max: 100 // Cap at 100% for success rate
+                    text: 'Rate (%)'
                 }
             }
         }
     };
 
-    // Initialize API Success Rate Chart
-    var ctx1 = document.getElementById('apiSuccessRateChart').getContext('2d');
-    new Chart(ctx1, {
-        type: 'line', // Use line chart for area appearance
-        data: successRateData,
-        options: successRateOptions
-    });
-
-    // Failed API Calls Data
-    var failedApiData = {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'], // Example months
-        datasets: [{
-            label: 'Failed Calls',
-            data: [10, 15, 8, 5, 12, 9], // Example failure values
-            fill: true,
-            backgroundColor: 'rgba(255, 159, 64, 0.2)', // Light orange fill
-            borderColor: 'rgba(255, 159, 64, 1)', // Orange border
-            pointBackgroundColor: 'rgba(255, 159, 64, 1)',
-            tension: 0.4 // Smooth curve
-        }]
-    };
-
-    var failedApiOptions = {
-        responsive: false,
-        maintainAspectRatio: false,
-        scales: {
-            x: {
-                title: {
-                    display: true,
-                    text: 'Months'
-                }
-            },
-            y: {
-                beginAtZero: true,
-                title: {
-                    display: true,
-                    text: 'Number of Calls'
-                }
-            }
-        }
-    };
-
-    // Initialize Failed API Calls Chart
-    var ctx2 = document.getElementById('failedApiCallsChart').getContext('2d');
-    new Chart(ctx2, {
-        type: 'line', // Use line chart for area appearance
-        data: failedApiData,
-        options: failedApiOptions
-    });
-
-    // Export to CSV functionality for API Success Rate
-    document.getElementById("exportApiSuccessRate").addEventListener("click", function () {
-        const data = [["Month", "Success Rate (%)"]];
-        successRateData.labels.forEach((label, index) => {
-            data.push([label, successRateData.datasets[0].data[index]]);
+    // Create charts for Success Rates
+    function createSuccessRateChart(elementId, data) {
+        var ctx = document.getElementById(elementId).getContext('2d');
+        return new Chart(ctx, {
+            type: 'bar',
+            data: data,
+            options: options
         });
-        
-        let csvContent = "data:text/csv;charset=utf-8," + 
+    }
+
+    // Create charts for Failure Rates
+    function createFailureRateChart(elementId, data) {
+        var ctx = document.getElementById(elementId).getContext('2d');
+        return new Chart(ctx, {
+            type: 'bar',
+            data: data,
+            options: options
+        });
+    }
+
+    // Initialize all charts
+    createSuccessRateChart('dailySuccessRateChart', successRateData.daily);
+    createSuccessRateChart('weeklySuccessRateChart', successRateData.weekly);
+    createSuccessRateChart('monthlySuccessRateChart', successRateData.monthly);
+    createFailureRateChart('dailyFailureRateChart', failureRateData.daily);
+    createFailureRateChart('weeklyFailureRateChart', failureRateData.weekly);
+    createFailureRateChart('monthlyFailureRateChart', failureRateData.monthly);
+
+    // Export CSV functionality
+    function exportCSV(data, fileName) {
+        const csvContent = "data:text/csv;charset=utf-8," + 
             data.map(row => row.join(",")).join("\n");
 
         const link = document.createElement("a");
         link.setAttribute("href", encodeURI(csvContent));
-        link.setAttribute("download", "api_success_rate.csv");
+        link.setAttribute("download", fileName);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    }
+
+    // Export Success Rates to CSV
+    document.getElementById("exportDailySuccessRate").addEventListener("click", function () {
+        const data = [["Hour", "Success Rate (%)"]].concat(successRateData.daily.labels.map((label, index) => [label, successRateData.daily.datasets[0].data[index]]));
+        exportCSV(data, "daily_success_rate.csv");
     });
 
-    // Export to CSV functionality for Failed API Calls
-    document.getElementById("exportFailedApiCalls").addEventListener("click", function () {
-        const data = [["Month", "Failed Calls"]];
-        failedApiData.labels.forEach((label, index) => {
-            data.push([label, failedApiData.datasets[0].data[index]]);
-        });
-        
-        let csvContent = "data:text/csv;charset=utf-8," + 
-            data.map(row => row.join(",")).join("\n");
+    document.getElementById("exportWeeklySuccessRate").addEventListener("click", function () {
+        const data = [["Day", "Success Rate (%)"]].concat(successRateData.weekly.labels.map((label, index) => [label, successRateData.weekly.datasets[0].data[index]]));
+        exportCSV(data, "weekly_success_rate.csv");
+    });
 
-        const link = document.createElement("a");
-        link.setAttribute("href", encodeURI(csvContent));
-        link.setAttribute("download", "failed_api_calls.csv");
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+    document.getElementById("exportMonthlySuccessRate").addEventListener("click", function () {
+        const data = [["Week", "Success Rate (%)"]].concat(successRateData.monthly.labels.map((label, index) => [label, successRateData.monthly.datasets[0].data[index]]));
+        exportCSV(data, "monthly_success_rate.csv");
+    });
+
+    // Export Failure Rates to CSV
+    document.getElementById("exportDailyFailureRate").addEventListener("click", function () {
+        const data = [["Hour", "Failure Rate (%)"]].concat(failureRateData.daily.labels.map((label, index) => [label, failureRateData.daily.datasets[0].data[index]]));
+        exportCSV(data, "daily_failure_rate.csv");
+    });
+
+    document.getElementById("exportWeeklyFailureRate").addEventListener("click", function () {
+        const data = [["Day", "Failure Rate (%)"]].concat(failureRateData.weekly.labels.map((label, index) => [label, failureRateData.weekly.datasets[0].data[index]]));
+        exportCSV(data, "weekly_failure_rate.csv");
+    });
+
+    document.getElementById("exportMonthlyFailureRate").addEventListener("click", function () {
+        const data = [["Week", "Failure Rate (%)"]].concat(failureRateData.monthly.labels.map((label, index) => [label, failureRateData.monthly.datasets[0].data[index]]));
+        exportCSV(data, "monthly_failure_rate.csv");
     });
 </script>
 
@@ -1279,7 +1147,7 @@ $bounceRate = ($totalSessionTime/$totalSessionTime/20) *100;
     <div class="col-xl-6">
         <div class="card card-height-100">
             <div class="card-header align-items-center d-flex">
-                <h4 class="card-title mb-0 flex-grow-1">Live Users By Country</h4>
+                <h4 class="card-title mb-0 flex-grow-1">Live Users By State</h4>
                 <div class="flex-shrink-0">
                     <button type="button" class="btn btn-soft-primary btn-sm">
                         Export Report
@@ -1326,14 +1194,14 @@ $bounceRate = ($totalSessionTime/$totalSessionTime/20) *100;
     </div><!-- end col -->
 
     <!-- Second Card -->
-    <div class="col-xl-6">
+<!-- Main Page -->
+<div class="col-xl-6">
     <div class="card card-height-100">
         <div class="card-header align-items-center d-flex">
             <h4 class="card-title mb-0 flex-grow-1">Users From States</h4>
             <div>
-                <button type="button" class="btn btn-soft-secondary btn-sm">ALL</button>
-                <button type="button" class="btn btn-soft-primary btn-sm">1M</button>
-                <button type="button" class="btn btn-soft-secondary btn-sm">6M</button>
+                <!-- Button to View by States -->
+                <button type="button" class="btn btn-soft-secondary btn-sm" id="viewByStates">View All States</button>
             </div>
         </div>
         <div class="card-body p-0">
@@ -1343,58 +1211,78 @@ $bounceRate = ($totalSessionTime/$totalSessionTime/20) *100;
         </div>
     </div>
 </div><!-- end col -->
+
+<!-- Include ApexCharts Library -->
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script>
-var options = {
-    chart: {
-        type: 'bar', // Bar chart
-        height: 350
-    },
-    series: [{
-        name: 'Sessions',
-        data: [3000, 4000, 2500, 3500, 2900, 3300] // Example session data
-    }],
-    xaxis: {
-        categories: ['Maharashtra', 'Andhra Pradesh', 'Kerala', 'Goa', 'Jammu and Kashmir', 'Bihar'], // State names
-        title: {
-            text: 'States',
-            style: {
-                fontSize: '14px',
-                fontWeight: 'bold',
-            }
-        }
-    },
-    yaxis: {
-        title: {
-            text: 'Sessions',
-            style: {
-                fontSize: '14px',
-                fontWeight: 'bold',
-            }
-        }
-    },
-    colors: ['#00A878'], // Magenta color for all bars
-    grid: {
-        borderColor: '#f1f1f1' // Light grid lines
-    },
-    tooltip: {
-        y: {
-            formatter: function (val) {
-                return val + " sessions";
-            }
-        }
-    },
-    plotOptions: {
-        bar: {
-            borderRadius: 4, // Rounded corners
-            horizontal: false, // Vertical bars
-        }
-    },
-};
+    // Initial data for a few states (limited data)
+    var statesData = [
+        { name: 'Maharashtra', sessions: 3000 },
+        { name: 'Andhra Pradesh', sessions: 4000 },
+        { name: 'Kerala', sessions: 2500 },
+        { name: 'Goa', sessions: 3500 },
+        { name: 'Jammu and Kashmir', sessions: 2900 },
+        { name: 'Bihar', sessions: 3300 },
+    ];
 
-var chart = new ApexCharts(document.querySelector("#countries_charts"), options);
-chart.render();
+    // Initial chart options with limited states data
+    var options = {
+        chart: {
+            type: 'bar',
+            height: 350
+        },
+        series: [{
+            name: 'Sessions',
+            data: statesData.map(state => state.sessions)
+        }],
+        xaxis: {
+            categories: statesData.map(state => state.name),
+            title: {
+                text: 'States',
+                style: {
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                }
+            }
+        },
+        yaxis: {
+            title: {
+                text: 'Sessions',
+                style: {
+                    fontSize: '14px',
+                    fontWeight: 'bold',
+                }
+            }
+        },
+        colors: ['#00A878'],
+        grid: {
+            borderColor: '#f1f1f1'
+        },
+        tooltip: {
+            y: {
+                formatter: function (val) {
+                    return val + " sessions";
+                }
+            }
+        },
+        plotOptions: {
+            bar: {
+                borderRadius: 4,
+                horizontal: false,
+            }
+        },
+    };
+
+    var chart = new ApexCharts(document.querySelector("#countries_charts"), options);
+    chart.render();
+
+    // Redirect to the new PHP page
+    document.getElementById("viewByStates").addEventListener("click", function () {
+        window.open("allstates.php", "_blank", "width=800,height=600");
+    });
 </script>
+
+
 
 
     <!-- Third Card -->
