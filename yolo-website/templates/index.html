@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YOLO Object Detection</title>
+    <style>
+        body {
+            text-align: center;
+            padding: 20px;
+        }
+        img {
+            width: 640px;
+            height: 480px;
+        }
+        #detected-classes {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .detected-class {
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <h1>YOLO Object Detection in Real-Time</h1>
+
+    <!-- Video Stream -->
+    <img src="{{ url_for('video_feed') }}" />
+
+    <div>
+        <!-- Start and Stop buttons -->
+        <form action="/start_stream" method="POST">
+            <button type="submit">Start Stream</button>
+        </form>
+        <form action="/stop_stream" method="POST">
+            <button type="submit">Stop Stream</button>
+        </form>
+    </div>
+
+    <div id="detected-classes">
+        <h2>Detected Classes:</h2>
+        <ul id="class-list">
+            {% for class_name in detected_classes %}
+                <li class="detected-class">{{ class_name }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- JS to update the detected classes in real-time -->
+    <script>
+        function updateDetectedClasses() {
+            fetch('/get_classes')
+                .then(response => response.json())
+                .then(data => {
+                    const classList = document.getElementById('class-list');
+                    classList.innerHTML = '';  // Clear the current list
+                    data.classes.forEach(cls => {
+                        const listItem = document.createElement('li');
+                        listItem.className = 'detected-class';
+                        listItem.textContent = cls;
+                        classList.appendChild(listItem);
+                    });
+                });
+        }
+
+        // Update the detected classes every 2 seconds
+        setInterval(updateDetectedClasses, 2000);
+    </script>
+</body>
+</html>
